@@ -1,0 +1,34 @@
+{
+  "name": "jobsApplyingManager",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "dependencies": {
+    "vue": "^2.6.11",
+    "vue-hot-reload-api": "^2.3.4"
+  },
+  "devDependencies": {
+    "@vue/component-compiler-utils": "^3.2.0",
+    "html-tagged-template": "^2.2.0",
+    "parcel-bundler": "^1.12.4",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShayanTavaril/jobsApplyingManager.git"
+  },
+  "alias": {
+    "vue": "./node_modules/vue/dist/vue.common.js"
+  },
+  "keywords": [],
+  "author": "ShayanTavaril",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ShayanTavaril/jobsApplyingManager/issues"
+  },
+  "homepage": "https://github.com/ShayanTavaril/jobsApplyingManager#readme"
+}
