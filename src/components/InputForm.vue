@@ -1,8 +1,31 @@
 <template>
   <div class="wrapper">
-    <label :for="inputName">{{ labelName }}</label>
-    <textarea v-if="inputType === 'textarea'" :name="inputName" rows="10"></textarea>
-    <input v-else :name="inputName" :type="inputType" :disabled="isDisabled" />
+    <input
+      v-if="inputType === 'checkbox'"
+      :name="inputName"
+      :type="inputType"
+      :checked="value"
+      @input="$emit('change', $event.target.value)"
+    />
+    <label v-if="inputType === 'checkbox'" class="checkBoxLabel" :for="inputName">{{ labelName }}</label>
+
+    <label v-else :for="inputName" class="genericLabel">{{ labelName }}</label>
+    <input
+      v-if="inputType !== 'textarea'&& inputType !== 'checkbox'"
+      class="genericInput"
+      :name="inputName"
+      :type="inputType"
+      :value="value"
+      @input="$emit('input', $event.target.value)"
+      :disabled="isDisabled"
+    />
+    <textarea
+      v-if="inputType === 'textarea'"
+      :name="inputName"
+      :value="value"
+      @input="$emit('input', $event.target.value)"
+      rows="10"
+    ></textarea>
   </div>
 </template>
 
@@ -12,9 +35,13 @@ export default {
   props: {
     inputType: {
       type: String,
-      default: "text"
+      default: 'text'
     },
     labelName: String,
+    value: {
+      type: String,
+      default: ''
+    },
     isDisabled: {
       type: Boolean,
       default: false
@@ -31,27 +58,41 @@ export default {
 <style scoped>
 .wrapper {
   display: flex;
-  border: 1px solid rgb(0, 66, 141);
   margin: 5px 0;
 }
 .wrapper > * {
-  border: none;
   line-height: 1;
 }
 
-input,
+.genericInput,
 textarea {
   flex: 1 1 auto;
 }
 
-label {
+input[type=checkbox] {
+  margin: 12px 5px 12px 0px;
+}
+
+.checkBoxLabel {
+  color: #575757;
+  font-size: 1em;
+  margin-top: 8px;
+}
+
+.genericInput:focus,
+textarea:focus {
+  border: 2px solid #eaa60c;
+  outline: auto 1px #eaa60c;
+}
+
+.genericLabel {
   background: #575757;
   color: #fff;
   min-width: 115px;
 }
 
-label,
-input {
+.genericLabel,
+.genericInput {
   margin: 0;
   padding: 10px;
 }
