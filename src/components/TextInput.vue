@@ -1,24 +1,6 @@
 <template>
   <div class="wrapper">
-    <input
-      v-if="inputType === 'checkbox'"
-      :name="inputName"
-      :type="inputType"
-      :checked="value"
-      @input="$emit('change', $event.target.value)"
-    />
-    <label v-if="inputType === 'checkbox'" class="checkBoxLabel" :for="inputName">{{ labelName }}</label>
-
-    <label v-else :for="inputName" class="genericLabel">{{ labelName }}</label>
-    <input
-      v-if="inputType !== 'textarea'&& inputType !== 'checkbox'"
-      class="genericInput"
-      :name="inputName"
-      :type="inputType"
-      :value="value"
-      @input="$emit('input', $event.target.value)"
-      :disabled="isDisabled"
-    />
+    <label :for="inputName" class="genericLabel">{{ labelName }}</label>
     <textarea
       v-if="inputType === 'textarea'"
       :name="inputName"
@@ -26,12 +8,21 @@
       @input="$emit('input', $event.target.value)"
       rows="10"
     ></textarea>
+    <input
+      v-else
+      class="genericInput"
+      :name="inputName"
+      :type="inputType"
+      :value="value"
+      @input="$emit('input', $event.target.value)"
+      :disabled="isDisabled"
+    />
   </div>
 </template>
 
 <script>
 export default {
-  name: 'InputForm',
+  name: 'TextInput',
   props: {
     inputType: {
       type: String,
@@ -58,7 +49,6 @@ export default {
 <style scoped>
 .wrapper {
   display: flex;
-  margin: 5px 0;
 }
 .wrapper > * {
   line-height: 1;
@@ -69,7 +59,7 @@ textarea {
   flex: 1 1 auto;
 }
 
-input[type=checkbox] {
+input[type="checkbox"] {
   margin: 12px 5px 12px 0px;
 }
 
@@ -87,7 +77,6 @@ textarea:focus {
 
 .genericLabel {
   background: #575757;
-  color: #fff;
   min-width: 115px;
 }
 

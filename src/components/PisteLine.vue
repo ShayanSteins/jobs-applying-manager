@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: 'ArrayLine',
+  name: 'PisteLine',
   props: {
     piste: {
       type: Object

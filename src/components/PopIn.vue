@@ -5,20 +5,20 @@
       <h1 v-else>Détails de la piste</h1>
       <div class="wholePiste">
         <div class="left">
-          <InputForm inputType="text" labelName="Société" v-model="piste.societe"></InputForm>
-          <InputForm inputType="text" labelName="Technologies" v-model="piste.technos"></InputForm>
-          <InputForm inputType="url" labelName="Liens" v-model="piste.liens"></InputForm>
-          <Dates></Dates>
+          <TextInput inputType="text" labelName="Société" v-model="piste.societe"></TextInput>
+          <TextInput inputType="text" labelName="Technologies" v-model="piste.technos"></TextInput>
+          <TextInput inputType="url" labelName="Liens" v-model="piste.liens"></TextInput>
+          <DatesManager v-model="piste.dates"></DatesManager>
         </div>
         <div class="right">
-          <InputForm inputType="text" labelName="Etat" isDisabled v-model="piste.etat"></InputForm>
-          <InputForm inputType="text" labelName="Interlocuteur" v-model="piste.interlocuteur"></InputForm>
-          <InputForm inputType="text" labelName="Localisation" v-model="piste.localisation"></InputForm>
-          <InputForm inputType="checkbox" labelName="Fermée" v-model="piste.closed"></InputForm>
+          <TextInput inputType="text" labelName="Etat" isDisabled v-model="piste.etat"></TextInput>
+          <TextInput inputType="text" labelName="Interlocuteur" v-model="piste.interlocuteur"></TextInput>
+          <TextInput inputType="text" labelName="Localisation" v-model="piste.localisation"></TextInput>
+          <CheckboxInput v-if="newItem" labelName="Fermée" v-model="piste.closed"></CheckboxInput>
         </div>
       </div>
       <div class="middle">
-        <InputForm inputType="textarea" labelName="Notes" v-model="piste.notes"></InputForm>
+        <TextInput inputType="textarea" labelName="Notes" v-model="piste.notes"></TextInput>
       </div>
       <div class="histContainer" v-if="piste.historique.length">
         <h2>Historique</h2>
@@ -36,14 +36,15 @@
 </template>
 
 <script>
-import Dates from './Dates.vue'
-import InputForm from './InputForm.vue'
+import DatesManager from './DatesManager.vue'
+import TextInput from './TextInput.vue'
+import CheckboxInput from './CheckboxInput.vue'
 import HistoriqueLine from './HistoriqueLine.vue'
 
 export default {
   name: 'PopIn',
   components: {
-    Dates, InputForm, HistoriqueLine
+    DatesManager, TextInput, CheckboxInput, HistoriqueLine
   },
   props: {
     newItem: {
@@ -63,7 +64,8 @@ export default {
         liens: "",
         notes: "",
         historique: [],
-        closed: ""
+        closed: "",
+        dates: []
       }
     }
   },
@@ -89,6 +91,7 @@ export default {
         date: new Date,
         modif: "Création de la piste " + this.piste.id
       })
+      console.log(this.piste)
       this.pistes.push(this.piste)
       this.piste = {
         id: "",
@@ -100,7 +103,8 @@ export default {
         liens: "",
         notes: "",
         historique: [],
-        closed: ""
+        closed: "",
+        dates: []
       }
       this.savePistes()
       this.$emit('close')
@@ -140,6 +144,7 @@ export default {
   width: 100%;
   height: 100%;
   z-index: 1999;
+  overflow: auto;
 }
 .popin {
   margin: 50px;
@@ -170,6 +175,9 @@ h1 {
 }
 .right {
   flex: 1 1 auto;
+}
+.left > div, .right > div {
+  margin: 5px 0;
 }
 .middle {
   width: calc();

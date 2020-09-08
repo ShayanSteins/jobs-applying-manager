@@ -17,7 +17,7 @@
             <th>Prochain rdv</th>
             <th>Interlocuteur</th>
           </thead>
-          <ArrayLine v-for="piste in pistes" :key="piste.id" :piste="piste"></ArrayLine>
+          <PisteLine v-for="piste in pistes" :key="piste.id" :piste="piste"></PisteLine>
         </table>
         <div class="notif">Notifications</div>
       </div>
@@ -27,13 +27,13 @@
 
 <script>
 import PopIn from './components/PopIn.vue'
-import ArrayLine from './components/ArrayLine.vue'
+import PisteLine from './components/PisteLine.vue'
 import { jsonDatas } from '../assets/data.js'
 
 export default {
   name: 'App',
   components: {
-    PopIn, ArrayLine
+    PopIn, PisteLine
   },
   data () {
     return {
@@ -129,13 +129,16 @@ table {
   flex-grow: 3;
 }
 table,
-th,
 td {
-  border: 1px solid black;
+  border: 1px solid #636363;
 }
 th {
   height: 30px;
   background: #636363;
+  border-right: 1px solid#f8f8f8;
+}
+th:last-of-type {
+  border-right: none;
 }
 th,
 td {

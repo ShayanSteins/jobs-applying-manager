@@ -1,0 +1,51 @@
+<template>
+  <div class="wrapper">
+    <input
+      type="checkbox"
+      :name="inputName"
+      :checked="checked"
+      @change="$emit('change', $event.target.checked)"
+    />
+    <label v-if="labelName" class="checkBoxLabel" :for="inputName">{{ labelName }}</label>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'CheckboxInput',
+  model: {
+    prop: 'checked',
+    event: 'change'
+  },
+  props: {
+    checked: {
+      type: Boolean
+    },
+    labelName: String,
+  },
+  data() {
+    return {
+      inputName: this.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+    }
+  }
+}
+</script>
+
+<style scoped>
+.wrapper {
+  /* display: flex;
+  justify-content: center; */
+}
+.wrapper > * {
+  /* line-height: 1; */
+}
+input[type="checkbox"] {
+  
+}
+
+label {
+  color: #575757;
+  font-size: 0.9em;
+  margin-left: 5px;
+}
+</style>

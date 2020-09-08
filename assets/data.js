@@ -9,13 +9,15 @@ export var jsonDatas = [
     "closed": false,
     "dates": [
       {
+        "id": 1,
         "type": "Postulation",
-        "date": "2020-09-03T13:06:35.216Z",
+        "date": "2020-09-08T02:06",
         "retour": true
       },
       {
+        "id": 2,
         "type": "Entretient RH",
-        "date": "2020-09-28T14:06:35.216Z",
+        "date": "2020-09-28T02:06",
         "retour": false
       }
     ],
@@ -42,8 +44,9 @@ export var jsonDatas = [
     "closed": false,
     "dates": [
       {
+        "id": 3,
         "type": "Postulation",
-        "date": "2020-08-03T13:04:35.216Z",
+        "date": "2020-09-04T02:06",
         "retour": true
       }
     ],
