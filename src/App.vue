@@ -6,7 +6,15 @@
     <main>
       <button @click="popInDisplayed = true">Nouveau</button>
       <transition name="fade">
-        <PopIn v-if="popInDisplayed" @close="popInDisplayed = false" :newItem="newItem"></PopIn>
+        <PopIn
+          v-if="popInDisplayed"
+          :isNewItem="isNewItem"
+          :pisteToModify="pisteToModify"
+          v-model="newPiste"
+          @close="popInDisplayed = false"
+          @save="savePiste"
+          @update="updatePiste"
+        ></PopIn>
       </transition>
       <div class="boardContent">
         <table>
@@ -17,7 +25,12 @@
             <th>Prochain rdv</th>
             <th>Interlocuteur</th>
           </thead>
-          <PisteLine v-for="piste in pistes" :key="piste.id" :piste="piste"></PisteLine>
+          <tr v-if="!pistes.length">
+            <td
+              colspan="5"
+            >Vous n'avez aucune piste pour le moment... Il est temps de parcourir les sites d'annonces</td>
+          </tr>
+          <PisteLine v-for="piste in pistes" :key="piste.id" :piste="piste" @open-popin="openPopin"></PisteLine>
         </table>
         <div class="notif">Notifications</div>
       </div>
@@ -27,7 +40,7 @@
 
 <script>
 import PopIn from './components/PopIn.vue'
-import PisteLine from './components/PisteLine.vue'
+import PisteLine from './components/tableLine/PisteLine.vue'
 import { jsonDatas } from '../assets/data.js'
 
 export default {
@@ -35,49 +48,64 @@ export default {
   components: {
     PopIn, PisteLine
   },
-  data () {
+  data() {
     return {
       popInDisplayed: false,
-      newItem: true,
+      isNewItem: true,
+      pisteToModify: {},
       pistes: [],
       newPiste: {}
     }
   },
-  mounted () {
-    if(localStorage.getItem('pistes')) {
+  mounted() {
+    if (localStorage.getItem('pistes')) {
       try {
         this.pistes = JSON.parse(localStorage.getItem('pistes'))
       } catch (e) {
-        localStorage.removeItem('pistes')        
-      }      
+        localStorage.removeItem('pistes')
+      }
     }
     else {
       this.pistes = jsonDatas
-      this.savePistes()
+      this.saveAllPistes()
     }
   },
-  // watch: {
-  //   pites(arr) {
-  //     localStorage.pisteCollection = arr;
-  //   }
-  // },
   methods: {
     getPisteById(id) {
       return this.pistes.find(piste => piste.id === id)
     },
-    addPiste() {
-      if(!this.newPiste.hasOwnProperty('id')) {
+    openPopin(piste) {
+      this.isNewItem = false
+      this.pisteToModify = piste
+      this.popInDisplayed = true
+    },
+    savePiste(isNewOne) {
+      if (!this.newPiste.hasOwnProperty('id')) {
         return
       }
-      this.pites.push(this.newPiste)
+
+      if (isNewOne) {
+        this.pistes.push(this.newPiste)
+      }
+      else {
+        const idx = this.pistes.find(p => p.id === this.newPiste.id)
+        if (idx !== undefined) {
+          this.pistes[idx] = this.newPiste
+        }
+      }
+
       this.newPiste = {}
-      this.savePistes();
+      this.popInDisplayed = false
+      this.saveAllPistes();
+    },
+    updatePiste(watchedPiste) {
+      this.newPiste = watchedPiste
     },
     removePiste(p) {
       this.pistes.splice(p, 1)
-      this.savePistes()
+      this.saveAllPistes()
     },
-    savePistes() {
+    saveAllPistes() {
       const parsedPistes = JSON.stringify(this.pistes)
       localStorage.setItem('pistes', parsedPistes)
     }
@@ -145,6 +173,7 @@ td {
   padding: 10px;
 }
 .notif {
+  display: none;
   flex-grow: 1;
   border: 1px solid grey;
   border-radius: 10% 25%;

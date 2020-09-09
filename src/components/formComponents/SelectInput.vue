@@ -1,6 +1,6 @@
 <template>
   <div>
-    <select :value="selected" @input="$emit('input', $event.target.value)">
+    <select :value="value" @input="$emit('input', $event.target.value)">
       <option disabled value="">Choisissez...</option>
       <option v-for="(opt, index) in options" :key="index" :value="opt">{{ opt }}</option>
     </select>
@@ -11,7 +11,7 @@
 export default {
   name: 'SelectInput',
   props: {
-    selected: {
+    value: {
       type: String,
       default: ''
     }

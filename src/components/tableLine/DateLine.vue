@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import CheckboxInput from "./CheckboxInput.vue"
+import CheckboxInput from "../formComponents/CheckboxInput.vue"
 
 export default {
   name: 'DateLine',

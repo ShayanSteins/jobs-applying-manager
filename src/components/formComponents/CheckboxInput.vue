@@ -32,17 +32,6 @@ export default {
 </script>
 
 <style scoped>
-.wrapper {
-  /* display: flex;
-  justify-content: center; */
-}
-.wrapper > * {
-  /* line-height: 1; */
-}
-input[type="checkbox"] {
-  
-}
-
 label {
   color: #575757;
   font-size: 0.9em;
