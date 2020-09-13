@@ -95,7 +95,7 @@ button {
 }
 label,
 td {
-  color: #575757;
+  color: var(--main-bg-color);
   font-size: 0.8em;
 }
 table {
@@ -106,5 +106,7 @@ th {
   font-size: 0.8em;
   padding: 2px;
   min-width: 7px;
+  background-color: var(--main-lighter-bg-color);
+  color: var(--main-text-color);
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <span class="date">{{ histo.date }} :</span>
+    <span class="date">{{ formatedDate }} :</span>
     <span class="modif">{{ histo.modif }}</span>
   </div>
 </template>
@@ -13,14 +13,19 @@ export default {
     histo: {
       type: Object
     }
+  },
+  computed: {
+    formatedDate: function () {
+      return new Date(this.histo.date).toLocaleString()
+    }
   }
 }
 </script>
 
 <style scoped>
 .container{
-  color: #828181;
-  font-size: 0.9em;
+  color: var(--main-lighter-bg-color);
+  font-size: 0.8em;
 }
 .date {
   font-weight: bold;

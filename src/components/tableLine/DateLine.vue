@@ -34,10 +34,8 @@ export default {
 
 <style scoped>
 td {
-  color: #575757;
   font-size: 0.8em;
-  text-align: center;
-  vertical-align: middle;
+  color: var(--main-bg-color);
 }
 button {
   padding: revert;

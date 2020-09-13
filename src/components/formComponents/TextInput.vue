@@ -64,7 +64,7 @@ input[type="checkbox"] {
 }
 
 .checkBoxLabel {
-  color: #575757;
+  color: var(--main-lighter-bg-color);
   font-size: 1em;
   margin-top: 8px;
 }
@@ -76,7 +76,7 @@ textarea:focus {
 }
 
 .genericLabel {
-  background: #575757;
+  background: var(--main-lighter-bg-color);
   min-width: 115px;
 }
 

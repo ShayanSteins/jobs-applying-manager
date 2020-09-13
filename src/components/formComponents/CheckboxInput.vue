@@ -33,7 +33,7 @@ export default {
 
 <style scoped>
 label {
-  color: #575757;
+  color: var(--main-lighter-bg-color);
   font-size: 0.9em;
   margin-left: 5px;
 }

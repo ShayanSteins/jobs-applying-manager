@@ -1,6 +1,10 @@
 <template>
-  <div class="shadow">
-    <div class="popin" :id="piste.id">
+  <div
+    class="shadowBox"
+    name="shadowBox"
+    @click="(e) => {if(e.target.classList[0] === 'shadowBox') $emit('close')}"
+  >
+    <div class="popin shadow" :id="piste.id">
       <h1 v-if="isNewItem">Création de la piste</h1>
       <h1 v-else>Détails de la piste</h1>
       <div class="wholePiste">
@@ -14,7 +18,7 @@
           <TextInput inputType="text" labelName="Etat" isDisabled v-model="piste.etat"></TextInput>
           <TextInput inputType="text" labelName="Interlocuteur" v-model="piste.interlocuteur"></TextInput>
           <TextInput inputType="text" labelName="Localisation" v-model="piste.localisation"></TextInput>
-          <CheckboxInput v-if="isNewItem" labelName="Fermée" v-model="piste.closed"></CheckboxInput>
+          <CheckboxInput v-if="!isNewItem" labelName="Fermée" v-model="piste.closed"></CheckboxInput>
         </div>
       </div>
       <div class="middle">
@@ -31,8 +35,9 @@
         </div>
       </div>
       <div class="buttonContainer">
-        <button v-if="isNewItem" @click="$emit('save', true)">Enregistrer</button>
-        <button v-else @click="$emit('save', false)">Mettre à jour</button>
+        <button v-if="!isNewItem" @click="$emit('delete', piste)" class="deleteButton">Supprimer</button>
+        <button v-if="isNewItem" @click="$emit('save', true, piste)">Enregistrer</button>
+        <button v-else @click="$emit('save', false, piste)">Mettre à jour</button>
         <button @click="$emit('close')">Annuler</button>
       </div>
     </div>
@@ -69,7 +74,7 @@ export default {
           notes: "",
           historique: [{
             date: new Date,
-            modif: "Création de la piste " + this.piste.id
+            modif: "Création de la piste."
           }],
           closed: false,
           dates: []
@@ -79,39 +84,18 @@ export default {
   },
   data() {
     return {
-      pistes: [],
       piste: this.pisteToModify
     }
   },
   watch: {
     piste: {
       handler: function () {
-        this.$emit('update', this.piste)
+        console.log("test")
+        //this.$emit('update', this.piste)
       },
       deep: true
     }
   },
-  // mounted() {
-  //   if (this.isNewItem)
-  //     this.piste = {
-  //       id: createUUID(),
-  //       etat: "Nouvelle",
-  //       societe: "",
-  //       interlocuteur: "",
-  //       localisation: "",
-  //       technos: "",
-  //       liens: "",
-  //       notes: "",
-  //       historique: [{
-  //         date: new Date,
-  //         modif: "Création de la piste " + this.piste.id
-  //       }],
-  //       closed: false,
-  //       dates: []
-  //     }
-  //   else
-  //     this.piste = this.pisteToModify
-  // },
   methods: {
     updateDatesList(newDates) {
       this.piste.dates = newDates
@@ -121,7 +105,7 @@ export default {
 </script>
 
 <style scoped>
-.shadow {
+.shadowBox {
   background: rgb(121 121 121 / 52%);
   position: fixed;
   top: 0;
@@ -133,11 +117,9 @@ export default {
 }
 .popin {
   margin: 40px;
-  background: #f8f8f8;
+  background: var(--main-text-color);
   border: none;
   border-radius: 7px;
-  box-shadow: 10px 10px 10px 2px rgb(21 21 21 / 55%),
-    0 2px 8px rgba(0, 0, 0, 0.33);
 }
 h1 {
   margin: 0;
@@ -145,7 +127,7 @@ h1 {
   font-size: 1.6em;
   border-top-left-radius: 7px;
   border-top-right-radius: 7px;
-  background-color: #552d6e;
+  background-color: var(--main-violet);
 }
 .wholePiste {
   display: flex;
@@ -173,15 +155,16 @@ h1 {
 }
 h2 {
   margin: 0 0 10px;
+  color: var(--main-bg-color);
 }
 .histContainer,
 .middle {
   padding: 10px;
 }
 .histSubContainer {
-  border: 1px solid rgb(91, 91, 91, 1);
   padding: 5px;
   background-color: rgba(239, 239, 239, 0.3);
+  border: 1px solid rgba(118, 118, 118, 0.3);
 }
 .buttonContainer {
   display: flex;

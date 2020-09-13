@@ -1,6 +1,6 @@
 export var jsonDatas = [
   {
-    "id": 0,
+    "id": "Ida5416918-a08f-4297-a1f7-4a7b85db02b4",
     "etat": "Nouvelle",
     "societe": "Truc",
     "interlocuteur": "Muche",
@@ -32,7 +32,7 @@ export var jsonDatas = [
     "historique": [
       {
         "date": "2020-09-03T13:06:35.216Z",
-        "modif": "Création de la piste 0"
+        "modif": "Création de la piste."
       },
       {
         "date": "2020-09-09T13:06:35.216Z",
@@ -41,7 +41,7 @@ export var jsonDatas = [
     ]
   },
   {
-    "id": 1,
+    "id": "Id40a28840-6ac2-443e-b89a-a463380e3b09",
     "etat": "Postulée",
     "societe": "Nana",
     "interlocuteur": "José",
@@ -61,11 +61,11 @@ export var jsonDatas = [
     "historique": [
       {
         "date": "2020-09-07T13:06:35.216Z",
-        "modif": "Création de la piste 1"
+        "modif": "Création de la piste."
       },
       {
         "date": "2020-09-10T13:06:35.216Z",
-        "modif": "Modification de la Société 'Turc' à 'Truc'"
+        "modif": "Modification de la Société 'Nanar' à 'Nana'"
       }
     ]
   }
