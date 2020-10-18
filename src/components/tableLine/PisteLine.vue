@@ -1,7 +1,7 @@
 <template>
-  <tr @click="(e) => { if(e.target.type !== 'checkbox') $emit('open-popin', piste) }">
+  <tr @click="(e) => { if(e.target.type !== 'checkbox') $emit('open-popin', false, piste) }" :class="{ closed : piste.closed }">
     <td>
-      <CheckBoxInput labelName v-model="checked" @change="$emit('check', [piste.id, checked])"></CheckBoxInput>
+      <CheckBoxInput labelName v-model="dataChecked" @change="$emit('check', [piste.id, $event])"></CheckBoxInput>
     </td>
     <td>{{ piste.etat }}</td>
     <td>{{ piste.societe }}</td>
@@ -19,10 +19,6 @@ export default {
   components: {
     CheckBoxInput
   },
-  model: {
-    prop: 'checked',
-    event: 'check'
-  },
   props: {
     piste: {
       type: Object
@@ -30,6 +26,11 @@ export default {
     checked: {
       type: Boolean,
       default: false
+    }
+  },
+  data() {
+    return {
+      dataChecked: this.checked
     }
   },
   computed: {
@@ -68,5 +69,9 @@ export default {
   cursor: pointer;
   background-color: var(--main-lighter-violet);
   color: var(--main-darker-bg-color);
+}
+.closed {
+  text-decoration: line-through;
+  background-color: var(--main-lighter-bg-color);
 }
 </style>

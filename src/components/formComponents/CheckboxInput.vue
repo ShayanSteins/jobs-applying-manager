@@ -3,7 +3,7 @@
     <input
       type="checkbox"
       :name="inputName"
-      :checked="checked"
+      :checked="dataChecked"
       @change="$emit('change', $event.target.checked)"
     />
     <label v-if="labelName" class="checkBoxLabel" :for="inputName">{{ labelName }}</label>
@@ -25,6 +25,7 @@ export default {
   },
   data() {
     return {
+      dataChecked: this.checked,
       inputName: this.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
     }
   }

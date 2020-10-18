@@ -4,19 +4,21 @@
       <span>Jobs Applying Manager</span>
     </header>
     <main>
-      <button @click="popInDisplayed = true, isNewItem = true">Nouveau</button>
-      <button class="deleteButton" @click="removePiste" :disabled="{ disabled: idsToDelete.length === 0 }">Supprimer</button>
+      <button @click="openPopin(true)">Nouveau</button>
+      <button
+        class="deleteButton"
+        @click="removePiste"
+        :disabled="deleteButtonDisabled === 0"
+      >Supprimer</button>
       <transition name="fade">
         <PopIn
           v-if="popInDisplayed"
           :isNewItem="isNewItem"
           :pisteToModify="pisteToModify"
-          v-model="newPiste"
-          @close="popInDisplayed = false, pisteToModify = undefined"
+          @close="closePopin"
           @delete="removePiste"
           @check="checkedPiste"
           @save="savePiste"
-          @update="updatePiste"
         ></PopIn>
       </transition>
       <div class="boardContent">
@@ -34,7 +36,13 @@
               colspan="6"
             >Vous n'avez aucune piste pour le moment... Il est temps de parcourir les sites d'annonces</td>
           </tr>
-          <PisteLine v-for="[id, piste] in pistes" :key="id" :piste="piste" @open-popin="openPopin"></PisteLine>
+          <PisteLine
+            v-for="[id, piste] in pistes"
+            :key="id"
+            :piste="piste"
+            @open-popin="openPopin"
+            @check="checkedPiste"
+          ></PisteLine>
         </table>
         <div class="notif">Notifications</div>
       </div>
@@ -57,9 +65,9 @@ export default {
       popInDisplayed: false,
       isNewItem: true,
       pisteToModify: undefined,
-      idsToDelete: [],
+      idsToDelete: new Set(),
       pistes: new Map(),
-      newPiste: {}
+      deleteButtonDisabled: 0
     }
   },
   beforeMount() {
@@ -67,6 +75,7 @@ export default {
     if (storage !== null && storage !== undefined) {
       try {
         this.pistes = new Map(JSON.parse(storage))
+        this.calculateState()
       } catch (e) {
         localStorage.removeItem('pistes')
         console.error(e.message)
@@ -74,50 +83,70 @@ export default {
     }
     else {
       jsonDatas.forEach(item => this.pistes.set(item.id, item))
+      this.calculateState()
       this.saveAllPistes()
     }
   },
   methods: {
-    openPopin(piste) {
-      this.isNewItem = false
-      this.pisteToModify = piste
+    openPopin(isNewItem, piste) {
+      this.isNewItem = isNewItem
+      if (!isNewItem) {
+        this.pisteToModify = Object.assign({}, piste)
+      }
       this.popInDisplayed = true
     },
-    savePiste(isNewOne, pisteFromPopin) {
+    closePopin() {
+      this.pisteToModify = undefined
+      this.popInDisplayed = false
+    },
+    savePiste(pisteFromPopin) {
       if (!pisteFromPopin.hasOwnProperty('id')) {
         return
       }
-
       this.pistes.set(pisteFromPopin.id, pisteFromPopin)
-
-      this.newPiste = {}
-      this.popInDisplayed = false
+      this.calculateState()
+      this.closePopin()
       this.saveAllPistes();
     },
-    updatePiste(watchedPiste) {
-      this.newPiste = watchedPiste
-    },
-    checkedPiste(id, bool) {
-      console.log(`Before : ${this.idsToDelete}`)
+    checkedPiste(data) {
+      const [id, bool] = data
       if (bool)
-        this.idsToDelete.push(id)
+        this.idsToDelete.add(id)
       else
-        this.idsToDelete.slice(id, 1)
-      console.log(`After : ${this.idsToDelete}`)
+        this.idsToDelete.delete(id)
+      this.deleteButtonDisabled = this.idsToDelete.size
     },
     removePiste(p) {
-      if (p !== undefined)
-        this.idsToDelete = [p.id]
-
+      if (p !== undefined && !(p instanceof MouseEvent)) 
+        this.idsToDelete = new Set([p.id])
       this.idsToDelete.forEach(id => this.pistes.delete(id))
 
-      this.idsToDelete = []
-      this.popInDisplayed = false
+      this.idsToDelete = new Set()
+      this.closePopin()
       this.saveAllPistes()
+      this.deleteButtonDisabled = this.idsToDelete.size
     },
     saveAllPistes() {
       const parsedPistes = JSON.stringify(Array.from(this.pistes))
       localStorage.setItem('pistes', parsedPistes)
+    },
+    calculateState() {
+      for (let [id, p] of this.pistes) {
+        if (p.closed) {
+          p.etat = 'Fermée'
+        }
+        else if (undefined !== p.dates && p.dates.length > 0) {
+          // récupère la dernière date insérée
+          let lastDate = p.dates[p.dates.length - 1]
+          // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : Etat = Postulée
+          if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) p.etat = 'Postulée'
+          // Si la date d'entretient n'est pas encore passée
+          else if (new Date(lastDate.date) > new Date()) p.etat = 'En attente d\'entretient'
+          // Si la date d'entretient est passée et que l'on n'a pas eu de retour
+          else if (new Date(lastDate.date) < new Date() && !lastDate.retour) p.etat = 'En attente de retour'  
+          else p.etat = 'Terminée'
+        }
+      }
     }
   }
 }
@@ -212,7 +241,7 @@ td {
   background-color: #2d2a38;
 }
 
-.shadow {  
+.shadow {
   box-shadow: var(--shadow-element);
 }
 .fade-enter-active,
@@ -221,5 +250,9 @@ td {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
+}
+
+@media screen and (max-width: 900px){
+  
 }
 </style>

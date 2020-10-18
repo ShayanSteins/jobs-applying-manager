@@ -12,18 +12,12 @@ export var jsonDatas = [
         "id": 0,
         "type": "Postulation",
         "date": "2020-09-09T02:06",
-        "retour": false
-      },
-      {
-        "id": 1,
-        "type": "Postulation",
-        "date": "2020-09-08T02:06",
         "retour": true
       },
       {
         "id": 2,
         "type": "Entretient RH",
-        "date": "2020-09-28T02:06",
+        "date": "2020-10-28T02:06",
         "retour": false
       }
     ],
@@ -32,7 +26,7 @@ export var jsonDatas = [
     "historique": [
       {
         "date": "2020-09-03T13:06:35.216Z",
-        "modif": "Création de la piste."
+        "modif": "Création de la piste 0"
       },
       {
         "date": "2020-09-09T13:06:35.216Z",
@@ -42,12 +36,12 @@ export var jsonDatas = [
   },
   {
     "id": "Id40a28840-6ac2-443e-b89a-a463380e3b09",
-    "etat": "Postulée",
+    "etat": "Nouvelle",
     "societe": "Nana",
     "interlocuteur": "José",
     "localisation": "Petaouchnok",
     "technos": "truc, bidule",
-    "closed": false,
+    "closed": true,
     "dates": [
       {
         "id": 3,
@@ -61,11 +55,11 @@ export var jsonDatas = [
     "historique": [
       {
         "date": "2020-09-07T13:06:35.216Z",
-        "modif": "Création de la piste."
+        "modif": "Création de la piste 1"
       },
       {
         "date": "2020-09-10T13:06:35.216Z",
-        "modif": "Modification de la Société 'Nanar' à 'Nana'"
+        "modif": "Modification de la Société 'Turc' à 'Truc'"
       }
     ]
   }

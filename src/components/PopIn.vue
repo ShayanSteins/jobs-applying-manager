@@ -24,7 +24,7 @@
       <div class="middle">
         <TextInput inputType="textarea" labelName="Notes" v-model="piste.notes"></TextInput>
       </div>
-      <div class="histContainer" v-if="piste.historique.length">
+      <div class="histContainer" v-if="piste.historique">
         <h2>Historique</h2>
         <div class="histSubContainer">
           <HistoriqueLine
@@ -36,8 +36,8 @@
       </div>
       <div class="buttonContainer">
         <button v-if="!isNewItem" @click="$emit('delete', piste)" class="deleteButton">Supprimer</button>
-        <button v-if="isNewItem" @click="$emit('save', true, piste)">Enregistrer</button>
-        <button v-else @click="$emit('save', false, piste)">Mettre à jour</button>
+        <button v-if="isNewItem" @click="$emit('save', piste)">Enregistrer</button>
+        <button v-else @click="$emit('save', piste)">Mettre à jour</button>
         <button @click="$emit('close')">Annuler</button>
       </div>
     </div>
@@ -46,7 +46,7 @@
 
 <script>
 import DatesManager from './DatesManager.vue'
-import TextInput from './formComponents/TextInput'
+import TextInput from './formComponents/TextInput.vue'
 import CheckboxInput from './formComponents/CheckboxInput.vue'
 import HistoriqueLine from './tableLine/HistoriqueLine.vue'
 import { createUUID } from "../common.js"
@@ -84,16 +84,7 @@ export default {
   },
   data() {
     return {
-      piste: this.pisteToModify
-    }
-  },
-  watch: {
-    piste: {
-      handler: function () {
-        console.log("test")
-        //this.$emit('update', this.piste)
-      },
-      deep: true
+      piste: Object.assign({}, this.pisteToModify)
     }
   },
   methods: {
