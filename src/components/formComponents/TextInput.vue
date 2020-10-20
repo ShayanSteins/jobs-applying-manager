@@ -16,6 +16,7 @@
       :value="value"
       @input="$emit('input', $event.target.value)"
       :disabled="isDisabled"
+      :required="isRequired"
     />
   </div>
 </template>
@@ -29,6 +30,10 @@ export default {
       default: 'text'
     },
     labelName: String,
+    isRequired: {
+      type: Boolean,
+      default: false
+    },
     value: {
       type: String,
       default: ''

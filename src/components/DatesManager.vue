@@ -4,7 +4,7 @@
       <label>Ajouter un rdv :</label>
       <SelectInput v-model="newDateType"></SelectInput>
       <DateTimeInput v-model="newDateTime"></DateTimeInput>
-      <button @click="addDate" title="Ajouter un rdv">+</button>
+      <button type="button" @click="addDate" title="Ajouter un rdv">+</button>
     </div>
     <div class="dateTableContainer">
       <table>
@@ -60,14 +60,16 @@ export default {
   },
   methods: {
     addDate() {
-      this.dates.push({
-        id: createUUID(),
-        type: this.newDateType,
-        date: new Date(this.newDateTime),
-        retour: false
-      })
-      this.newDateTime = ''
-      this.newDateType = ''
+      if(this.newDateType !== null && this.newDateType !== '' && this.newDateTime !== null && this.newDateTime !== '') {
+        this.dates.push({
+          id: createUUID(),
+          type: this.newDateType,
+          date: new Date(this.newDateTime),
+          retour: false
+        })
+        this.newDateTime = ''
+        this.newDateType = ''
+      }
     },
     removeDate (idToRemove) {
       this.dates = this.dates.filter(date => {

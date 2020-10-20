@@ -7,39 +7,41 @@
     <div class="popin shadow" :id="piste.id">
       <h1 v-if="isNewItem">Création de la piste</h1>
       <h1 v-else>Détails de la piste</h1>
-      <div class="wholePiste">
-        <div class="left">
-          <TextInput inputType="text" labelName="Société" v-model="piste.societe"></TextInput>
-          <TextInput inputType="text" labelName="Technologies" v-model="piste.technos"></TextInput>
-          <TextInput inputType="url" labelName="Liens" v-model="piste.liens"></TextInput>
-          <DatesManager v-model="piste.dates" @change="updateDatesList"></DatesManager>
+      <form @submit="checkForm">
+        <div class="wholePiste">
+          <div class="left">
+            <TextInput inputType="text" labelName="Société" v-model="piste.societe" isRequired></TextInput>
+            <TextInput inputType="text" labelName="Technologies" v-model="piste.technos"></TextInput>
+            <TextInput inputType="url" labelName="Liens" v-model="piste.liens"></TextInput>
+            <DatesManager v-model="piste.dates" @change="updateDatesList"></DatesManager>
+          </div>
+          <div class="right">
+            <TextInput inputType="text" labelName="Etat" isDisabled v-model="piste.etat"></TextInput>
+            <TextInput inputType="text" labelName="Interlocuteur" v-model="piste.interlocuteur"></TextInput>
+            <TextInput inputType="text" labelName="Localisation" v-model="piste.localisation"></TextInput>
+            <CheckboxInput v-if="!isNewItem" labelName="Fermée" v-model="piste.closed"></CheckboxInput>
+          </div>
         </div>
-        <div class="right">
-          <TextInput inputType="text" labelName="Etat" isDisabled v-model="piste.etat"></TextInput>
-          <TextInput inputType="text" labelName="Interlocuteur" v-model="piste.interlocuteur"></TextInput>
-          <TextInput inputType="text" labelName="Localisation" v-model="piste.localisation"></TextInput>
-          <CheckboxInput v-if="!isNewItem" labelName="Fermée" v-model="piste.closed"></CheckboxInput>
+        <div class="middle">
+          <TextInput inputType="textarea" labelName="Notes" v-model="piste.notes"></TextInput>
         </div>
-      </div>
-      <div class="middle">
-        <TextInput inputType="textarea" labelName="Notes" v-model="piste.notes"></TextInput>
-      </div>
-      <div class="histContainer" v-if="piste.historique">
-        <h2>Historique</h2>
-        <div class="histSubContainer">
-          <HistoriqueLine
-            v-for="histo in piste.historique"
-            :key="histo.date.toString()"
-            :histo="histo"
-          ></HistoriqueLine>
+        <div class="histContainer" v-if="piste.historique">
+          <h2>Historique</h2>
+          <div class="histSubContainer">
+            <HistoriqueLine
+              v-for="histo in piste.historique"
+              :key="histo.date.toString()"
+              :histo="histo"
+            ></HistoriqueLine>
+          </div>
         </div>
-      </div>
-      <div class="buttonContainer">
-        <button v-if="!isNewItem" @click="$emit('delete', piste)" class="deleteButton">Supprimer</button>
-        <button v-if="isNewItem" @click="$emit('save', piste)">Enregistrer</button>
-        <button v-else @click="$emit('save', piste)">Mettre à jour</button>
-        <button @click="$emit('close')">Annuler</button>
-      </div>
+        <div class="buttonContainer">
+          <button v-if="!isNewItem" @click="$emit('delete', piste)" class="deleteButton">Supprimer</button>
+          <button v-if="isNewItem" type="submit">Enregistrer</button>
+          <button v-else type="submit">Mettre à jour</button>
+          <button @click="$emit('close')">Annuler</button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -90,6 +92,10 @@ export default {
   methods: {
     updateDatesList(newDates) {
       this.piste.dates = newDates
+    },
+    checkForm(e) {
+      e.preventDefault();
+      this.$emit('save', this.piste)
     }
   }
 }
