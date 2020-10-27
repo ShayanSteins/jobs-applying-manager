@@ -1,4 +1,4 @@
-export function createUUID () {
+export function createUUID() {
   // http://www.ietf.org/rfc/rfc4122.txt
   var s = []
   var hexDigits = '0123456789abcdef'
@@ -11,4 +11,38 @@ export function createUUID () {
 
   var uuid = s.join('')
   return 'Id' + uuid
+}
+
+export function deepCopy(inObject) {
+  let outObject, value, key
+
+  if ((typeof inObject !== "object" || inObject instanceof Date) || inObject === null) {
+    return inObject
+  }
+  outObject = Array.isArray(inObject) ? [] : {}
+  
+  for (key in inObject) {
+    value = inObject[key]
+    outObject[key] = deepCopy(value)
+  }
+  
+  return outObject
+}
+
+export function getUpdatedDatas(obj1, obj2) {
+  let modifications = []
+
+  for (const key in obj1) {
+    const val1 = obj1[key]
+    const val2 = obj2[key]
+    if(val1 !== val2) {
+      if (typeof val1 === 'object' && typeof val2 === 'object') {
+        const subComparison = getUpdatedDatas(val1, val2)
+        if (subComparison.length > 0) modifications.push(key)
+      } else {
+        modifications.push(key)
+      }
+    }
+  }
+  return modifications
 }

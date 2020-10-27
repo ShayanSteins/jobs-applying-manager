@@ -51,7 +51,7 @@ import DatesManager from './DatesManager.vue'
 import TextInput from './formComponents/TextInput.vue'
 import CheckboxInput from './formComponents/CheckboxInput.vue'
 import HistoriqueLine from './tableLine/HistoriqueLine.vue'
-import { createUUID } from "../common.js"
+import { createUUID, deepCopy, getUpdatedDatas } from "../common.js"
 
 export default {
   name: 'PopIn',
@@ -74,10 +74,7 @@ export default {
           technos: "",
           liens: "",
           notes: "",
-          historique: [{
-            date: new Date,
-            modif: "Création de la piste."
-          }],
+          historique: null,
           closed: false,
           dates: []
         }
@@ -86,7 +83,7 @@ export default {
   },
   data() {
     return {
-      piste: Object.assign({}, this.pisteToModify)
+      piste: deepCopy(this.pisteToModify)
     }
   },
   methods: {
@@ -95,8 +92,17 @@ export default {
     },
     checkForm(e) {
       e.preventDefault();
+      if(this.isNewItem) {
+        this.piste.historique = [{
+          date: new Date,
+          modif: "Création de la piste."
+        }]
+      }
+      else {
+        console.log(getUpdatedDatas(this.piste, this.pisteToModify))
+      }
       this.$emit('save', this.piste)
-    }
+    }    
   }
 }
 </script>
