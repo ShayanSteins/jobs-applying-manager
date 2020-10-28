@@ -51,7 +51,7 @@ import DatesManager from './DatesManager.vue'
 import TextInput from './formComponents/TextInput.vue'
 import CheckboxInput from './formComponents/CheckboxInput.vue'
 import HistoriqueLine from './tableLine/HistoriqueLine.vue'
-import { createUUID, deepCopy, getUpdatedDatas } from "../common.js"
+import { createUUID, deepCopy, deepComparison } from "../common.js"
 
 export default {
   name: 'PopIn',
@@ -86,12 +86,21 @@ export default {
       piste: deepCopy(this.pisteToModify)
     }
   },
+  mounted() {
+    // Stop le fire d'un des boutons du formulaire lors de l'appui sur la touche ENTREE dans un input
+    document.querySelectorAll('.popin input').forEach(input => {
+      input.addEventListener('keypress', e => e.preventDefault())
+    });
+  },
   methods: {
     updateDatesList(newDates) {
       this.piste.dates = newDates
     },
     checkForm(e) {
+      // Vérification du formulaire et mise à jour de l'historique avant sauvegarde
       e.preventDefault();
+
+      // Gestion de l'historique 
       if(this.isNewItem) {
         this.piste.historique = [{
           date: new Date,
@@ -99,10 +108,20 @@ export default {
         }]
       }
       else {
-        console.log(getUpdatedDatas(this.piste, this.pisteToModify))
+        const modifs = deepComparison(this.piste, this.pisteToModify)
+        let singPluriel = "du champ"
+        
+        if ( modifs.length > 0 ) {
+          if ( modifs.length > 1 ) singPluriel = "des champs"
+          this.piste.historique.push({
+            date: new Date,
+            modif: `Modification ${singPluriel} : ${modifs}`
+          })
+        }     
       }
+
       this.$emit('save', this.piste)
-    }    
+    }
   }
 }
 </script>

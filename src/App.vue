@@ -100,6 +100,7 @@ export default {
       this.popInDisplayed = false
     },
     savePiste(pisteFromPopin) {
+      // Ajout - MAJ d'une piste dans la liste
       if (!pisteFromPopin.hasOwnProperty('id')) {
         return
       }
@@ -109,6 +110,7 @@ export default {
       this.saveAllPistes();
     },
     checkedPiste(data) {
+      // Gestion des checkbox du tableau
       const [id, bool] = data
       if (bool)
         this.idsToDelete.add(id)
@@ -127,10 +129,12 @@ export default {
       this.deleteButtonDisabled = this.idsToDelete.size
     },
     saveAllPistes() {
+      // Mise à jour du localStorage
       const parsedPistes = JSON.stringify(Array.from(this.pistes))
       localStorage.setItem('pistes', parsedPistes)
     },
     calculateState() {
+      // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
       for (let [id, p] of this.pistes) {
         if (p.closed) {
           p.etat = 'Fermée'

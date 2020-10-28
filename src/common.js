@@ -1,3 +1,6 @@
+/**
+ * Génération d'un ID unique
+ */
 export function createUUID() {
   // http://www.ietf.org/rfc/rfc4122.txt
   var s = []
@@ -13,6 +16,10 @@ export function createUUID() {
   return 'Id' + uuid
 }
 
+/**
+ * Renvoi la copie d'un objet complet et non de sa référence
+ * @param {object | Array} inObject : objet à copier
+ */
 export function deepCopy(inObject) {
   let outObject, value, key
 
@@ -29,7 +36,12 @@ export function deepCopy(inObject) {
   return outObject
 }
 
-export function getUpdatedDatas(obj1, obj2) {
+/**
+ * Compare récurcivement un obj2 à un obj1. Retourne un tableau contenant le nom des différences, ou un tableau vide s'ils sont identiques
+ * @param {object} obj1 : objet d'origine
+ * @param {object} obj2 : objet à comparer
+ */
+export function deepComparison(obj1, obj2) {
   let modifications = []
 
   for (const key in obj1) {
@@ -37,7 +49,7 @@ export function getUpdatedDatas(obj1, obj2) {
     const val2 = obj2[key]
     if(val1 !== val2) {
       if (typeof val1 === 'object' && typeof val2 === 'object') {
-        const subComparison = getUpdatedDatas(val1, val2)
+        const subComparison = deepComparison(val1, val2)
         if (subComparison.length > 0) modifications.push(key)
       } else {
         modifications.push(key)

@@ -2,7 +2,7 @@
   <div class="wrapper">
     <input
       type="checkbox"
-      :name="inputName"
+      :id="inputName"
       :checked="dataChecked"
       @change="$emit('change', $event.target.checked)"
     />
