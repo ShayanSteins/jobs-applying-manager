@@ -52,14 +52,7 @@ export default {
 </script>
 
 <style scoped>
-.wrapper {
-  display: flex;
-}
-.wrapper > * {
-  line-height: 1;
-}
 
-.genericInput,
 textarea {
   flex: 1 1 auto;
 }
@@ -74,20 +67,8 @@ input[type="checkbox"] {
   margin-top: 8px;
 }
 
-.genericInput:focus,
 textarea:focus {
   border: 2px solid #eaa60c;
   outline: auto 1px #eaa60c;
-}
-
-.genericLabel {
-  background: var(--main-lighter-bg-color);
-  min-width: 115px;
-}
-
-.genericLabel,
-.genericInput {
-  margin: 0;
-  padding: 10px;
 }
 </style>

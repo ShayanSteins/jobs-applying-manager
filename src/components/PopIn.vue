@@ -11,7 +11,7 @@
         <div class="wholePiste">
           <div class="left">
             <TextInput inputType="text" labelName="Société" v-model="piste.societe" isRequired></TextInput>
-            <TextInput inputType="text" labelName="Technologies" v-model="piste.technos"></TextInput>
+            <AvailableOptionsInput labelName="Technologies" v-model="piste.technos" :dataList="listTechno"></AvailableOptionsInput>
             <TextInput inputType="url" labelName="Liens" v-model="piste.liens"></TextInput>
             <DatesManager v-model="piste.dates" @change="updateDatesList"></DatesManager>
           </div>
@@ -49,6 +49,7 @@
 <script>
 import DatesManager from './DatesManager.vue'
 import TextInput from './formComponents/TextInput.vue'
+import AvailableOptionsInput from './formComponents/AvailableOptionsInput.vue'
 import CheckboxInput from './formComponents/CheckboxInput.vue'
 import HistoriqueLine from './tableLine/HistoriqueLine.vue'
 import { createUUID, deepCopy, deepComparison } from "../common.js"
@@ -56,11 +57,14 @@ import { createUUID, deepCopy, deepComparison } from "../common.js"
 export default {
   name: 'PopIn',
   components: {
-    DatesManager, TextInput, CheckboxInput, HistoriqueLine
+    DatesManager, TextInput, AvailableOptionsInput, CheckboxInput, HistoriqueLine
   },
   props: {
     isNewItem: {
       type: Boolean
+    },
+    listTechno: {
+      type: Set
     },
     pisteToModify: {
       type: Object,
@@ -89,7 +93,9 @@ export default {
   mounted() {
     // Stop le fire d'un des boutons du formulaire lors de l'appui sur la touche ENTREE dans un input
     document.querySelectorAll('.popin input').forEach(input => {
-      input.addEventListener('keypress', e => e.preventDefault())
+      input.addEventListener('keypress', e => {
+        if (e.keyCode === 13) e.preventDefault() 
+        })
     });
   },
   methods: {

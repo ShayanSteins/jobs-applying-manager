@@ -19,6 +19,7 @@
           @delete="removePiste"
           @check="checkedPiste"
           @save="savePiste"
+          :listTechno="technologiesList"
         ></PopIn>
       </transition>
       <div class="boardContent">
@@ -70,6 +71,17 @@ export default {
       deleteButtonDisabled: 0
     }
   },
+  computed: {
+    technologiesList: function () {
+      const list = new Set()
+      for (const [key, val] of this.pistes) {
+        for (const techno of val.technos.split(', ')) {
+          list.add(techno)
+        }
+      }
+      return list
+    }
+  },
   beforeMount() {
     const storage = localStorage.getItem('pistes')
     if (storage !== null && storage !== undefined) {
@@ -107,7 +119,8 @@ export default {
       this.pistes.set(pisteFromPopin.id, pisteFromPopin)
       this.calculateState()
       this.closePopin()
-      this.saveAllPistes();
+      this.saveAllPistes()
+      this._computedWatchers['technologiesList'].run() // $forceUpdate()
     },
     checkedPiste(data) {
       // Gestion des checkbox du tableau
@@ -165,7 +178,7 @@ export default {
   --main-violet: rgb(76, 53, 147);
   --main-lighter-violet: rgb(175, 147, 235);
   --main-red: rgb(161, 27, 27);
-  --shadow-element: 3px 5px 12px rgb(21, 21, 21 / 78%);
+  --shadow-element: 3px 5px 12px rgb(21 21 21 / 78%);
 }
 body {
   font: 1.2em Helvetica, Arial, sans-serif;
@@ -254,6 +267,34 @@ td {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
+}
+
+
+.wrapper {
+  display: flex;
+}
+.wrapper > * {
+  line-height: 1;
+}
+
+.genericInput {
+  flex: 1 1 auto;
+}
+
+.genericInput:focus {
+  border: 2px solid rgb(234, 166, 12);
+  outline: auto 1px rgb(234, 166, 12);
+}
+
+.genericLabel {
+  background: var(--main-lighter-bg-color);
+  min-width: 115px;
+}
+
+.genericLabel,
+.genericInput {
+  margin: 0;
+  padding: 10px;
 }
 
 @media screen and (max-width: 900px){
