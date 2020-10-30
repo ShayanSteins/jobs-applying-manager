@@ -120,7 +120,7 @@ export default {
       this.calculateState()
       this.closePopin()
       this.saveAllPistes()
-      this._computedWatchers['technologiesList'].run() // $forceUpdate()
+      this._computedWatchers['technologiesList'].run() 
     },
     checkedPiste(data) {
       // Gestion des checkbox du tableau
