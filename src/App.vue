@@ -9,7 +9,9 @@
         class="deleteButton"
         @click="removePiste"
         :disabled="deleteButtonDisabled === 0"
-      >Supprimer</button>
+      >
+        Supprimer
+      </button>
       <transition name="fade">
         <PopIn
           v-if="popInDisplayed"
@@ -33,9 +35,10 @@
             <th>Interlocuteur</th>
           </thead>
           <tr v-if="!pistes.size">
-            <td
-              colspan="6"
-            >Vous n'avez aucune piste pour le moment... Il est temps de parcourir les sites d'annonces</td>
+            <td colspan="6">
+              Vous n'avez aucune piste pour le moment... Il est temps de
+              parcourir les sites d'annonces
+            </td>
           </tr>
           <PisteLine
             v-for="[id, piste] in pistes"
@@ -55,6 +58,7 @@
 import PopIn from './components/PopIn.vue'
 import PisteLine from './components/tableLine/PisteLine.vue'
 import { jsonDatas } from '../assets/data.js'
+import { deepCopy } from './common.js'
 
 export default {
   name: 'App',
@@ -103,7 +107,7 @@ export default {
     openPopin(isNewItem, piste) {
       this.isNewItem = isNewItem
       if (!isNewItem) {
-        this.pisteToModify = Object.assign({}, piste)
+        this.pisteToModify = deepCopy(piste)
       }
       this.popInDisplayed = true
     },
@@ -120,7 +124,7 @@ export default {
       this.calculateState()
       this.closePopin()
       this.saveAllPistes()
-      this._computedWatchers['technologiesList'].run() 
+      this._computedWatchers['technologiesList'].run()
     },
     checkedPiste(data) {
       // Gestion des checkbox du tableau
@@ -132,11 +136,17 @@ export default {
       this.deleteButtonDisabled = this.idsToDelete.size
     },
     removePiste(p) {
-      if (p !== undefined && !(p instanceof MouseEvent)) 
+      let oldSet = new Set()
+
+      // Supression via la popin
+      if (p !== undefined && !(p instanceof MouseEvent)) {
+        if (this.idsToDelete.size > 0) // on conserve la sélection du tableau du main
+          oldSet = this.idsToDelete
         this.idsToDelete = new Set([p.id])
+      }
       this.idsToDelete.forEach(id => this.pistes.delete(id))
 
-      this.idsToDelete = new Set()
+      this.idsToDelete = oldSet
       this.closePopin()
       this.saveAllPistes()
       this.deleteButtonDisabled = this.idsToDelete.size
@@ -160,7 +170,7 @@ export default {
           // Si la date d'entretient n'est pas encore passée
           else if (new Date(lastDate.date) > new Date()) p.etat = 'En attente d\'entretient'
           // Si la date d'entretient est passée et que l'on n'a pas eu de retour
-          else if (new Date(lastDate.date) < new Date() && !lastDate.retour) p.etat = 'En attente de retour'  
+          else if (new Date(lastDate.date) < new Date() && !lastDate.retour) p.etat = 'En attente de retour'
           else p.etat = 'Terminée'
         }
       }
@@ -269,7 +279,6 @@ td {
   opacity: 0;
 }
 
-
 .wrapper {
   display: flex;
 }
@@ -295,9 +304,5 @@ td {
 .genericInput {
   margin: 0;
   padding: 10px;
-}
-
-@media screen and (max-width: 900px){
-  
 }
 </style>

@@ -38,6 +38,7 @@ export default {
   },
   methods: {
     displayDataList(event) {
+      // Affichage des sugestions de technologies 
       const datalist = document.getElementById('availableTechnologies')
       datalist.style.display = 'block'
       datalist.style.width = event.target.offsetWidth + 'px'
@@ -45,10 +46,12 @@ export default {
       datalist.style.top = event.target.offsetTop + event.target.offsetHeight + 'px'
     },
     hideDataList(event) {
+      // Masquage des sugestions de technologies 
       if (event.relatedTarget === null || event.relatedTarget.tagName !== 'OPTION')
         document.getElementById('availableTechnologies').style.display = 'none'
     },
     addTechno(event) {
+      // Ajout de la technologie sélectionnée
       const input = document.getElementById(this.inputName)
       if (input.value === '') {
         input.value = event.target.value
