@@ -167,9 +167,6 @@ h1 {
 .right > div {
   margin: 5px 0;
 }
-.middle {
-  width: calc();
-}
 h1 {
   text-align: center;
 }

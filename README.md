@@ -13,7 +13,7 @@ Ainsi il est possible de saisir les différentes opportunités qui vous intéres
 
 ### Informations générales
 
-Ceci est la version 1 de l'application. Elle contient des fonctionnalités de bases comme l'ajout de piste et de rendez-vous sur chacune.  
+Ceci est la version 1 de l'application. Elle contient des fonctionnalités de bases comme l'ajout de piste et de rendez-vous.  
 La tableau de bords permets d'afficher l'ensemble de ces pistes ainsi que les prochains rendez-vous à venir.
 Un historique des champs modifiés est présent pour chaque piste.
 
@@ -24,16 +24,24 @@ Un historique des champs modifiés est présent pour chaque piste.
 - [Parcel](https://parceljs.org/)
 
 
-### Installation
+### Installation pour dev
 
 Lancer la commande :  
 
     npm install
 
+Puis :
+
+    npm run dev
+
+La commande suivante permet de générer la version build exécutable : 
+
+    npm run build
+
 
 ### V2
 
-Les améliorations suivantes sont prévues pour la prochaine version : 
+Les améliorations suivantes sont prévues pour la prochaine version 2 : 
 
 - Mise en place d'un serveur NodeJS
 - Remplacement du fichier data.js par data.json et écriture des modifications dans ce dernier
