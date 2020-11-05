@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="shadowBox"
-    name="shadowBox"
-    @click="(e) => {if(e.target.classList[0] === 'shadowBox') $emit('close')}"
-  >
+  <div class="shadowBox" name="shadowBox" @click="(e) => { if(e.target.classList[0] === 'shadowBox') $emit('close') }">
     <div class="popin shadow" :id="piste.id">
       <h1 v-if="isNewItem">Création de la piste</h1>
       <h1 v-else>Détails de la piste</h1>
@@ -28,11 +24,7 @@
         <div class="histContainer" v-if="piste.historique">
           <h2>Historique</h2>
           <div class="histSubContainer">
-            <HistoriqueLine
-              v-for="histo in piste.historique"
-              :key="histo.date.toString()"
-              :histo="histo"
-            ></HistoriqueLine>
+            <HistoriqueLine v-for="histo in piste.historique" :key="histo.date.toString()" :histo="histo"></HistoriqueLine>
           </div>
         </div>
         <div class="buttonContainer">
@@ -107,9 +99,9 @@ export default {
       e.preventDefault();
 
       // Gestion de l'historique 
-      if(this.isNewItem) {
+      if (this.isNewItem) {
         this.piste.historique = [{
-          date: new Date,
+          date: new Date().toISOString().split('T')[0] + 'T' + new Date().toLocaleTimeString(),
           modif: "Création de la piste."
         }]
       }
@@ -117,10 +109,10 @@ export default {
         const modifs = deepComparison(this.piste, this.pisteToModify)
         let singPluriel = "du champ"
         
-        if ( modifs.length > 0 ) {
-          if ( modifs.length > 1 ) singPluriel = "des champs"
+        if (modifs.length > 0) {
+          if (modifs.length > 1) singPluriel = "des champs"
           this.piste.historique.push({
-            date: new Date,
+            date: new Date().toISOString().split('T')[0] + 'T' + new Date().toLocaleTimeString(),
             modif: `Modification ${singPluriel} : ${modifs}`
           })
         }     

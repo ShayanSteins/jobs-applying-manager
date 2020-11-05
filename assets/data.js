@@ -2,64 +2,35 @@ export var jsonDatas = [
   {
     "id": "Ida5416918-a08f-4297-a1f7-4a7b85db02b4",
     "etat": "Nouvelle",
-    "societe": "Truc",
-    "interlocuteur": "Muche",
-    "localisation": "Petaouchnok",
-    "technos": "JS, XML, truc, bidule",
+    "societe": "Example",
+    "interlocuteur": "Dupont Cécile",
+    "localisation": "Paris",
+    "technos": "NodeJS, VueJS",
     "closed": false,
     "dates": [
       {
         "id": 0,
         "type": "Postulation",
-        "date": "2020-09-09T02:06",
+        "date": "2020-09-09T14:00",
         "retour": true
       },
       {
         "id": 2,
         "type": "Entretient RH",
-        "date": "2020-10-28T02:06",
+        "date": "2021-10-28T18:00",
         "retour": false
       }
     ],
     "liens": "http://google.com",
-    "notes": "TATATTATATATAT",
+    "notes": "Ceci est une piste d'example",
     "historique": [
       {
-        "date": "2020-09-03T13:06:35.216Z",
-        "modif": "Création de la piste 0"
+        "date": "2020-09-03T13:06:35",
+        "modif": "Création de la piste"
       },
       {
-        "date": "2020-09-09T13:06:35.216Z",
-        "modif": "Modification de la Société 'Turc' à 'Truc'"
-      }
-    ]
-  },
-  {
-    "id": "Id40a28840-6ac2-443e-b89a-a463380e3b09",
-    "etat": "Nouvelle",
-    "societe": "Nana",
-    "interlocuteur": "José",
-    "localisation": "Petaouchnok",
-    "technos": "truc, bidule",
-    "closed": true,
-    "dates": [
-      {
-        "id": 3,
-        "type": "Postulation",
-        "date": "2020-09-04T02:06",
-        "retour": true
-      }
-    ],
-    "liens": "http://google.com",
-    "notes": "TATATTATATATAT",
-    "historique": [
-      {
-        "date": "2020-09-07T13:06:35.216Z",
-        "modif": "Création de la piste 1"
-      },
-      {
-        "date": "2020-09-10T13:06:35.216Z",
-        "modif": "Modification de la Société 'Turc' à 'Truc'"
+        "date": "2020-09-09T10:00:00",
+        "modif": "Modification du champ : Société"
       }
     ]
   }
