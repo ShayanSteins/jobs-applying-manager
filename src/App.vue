@@ -57,8 +57,8 @@
 <script>
 import PopIn from './components/PopIn.vue'
 import PisteLine from './components/tableLine/PisteLine.vue'
-import { jsonDatas } from '../assets/data.js'
-import { deepCopy } from './common.js'
+import { jsonDatas } from '../server/assets/data.js'
+import { deepCopy, getAllPistes } from './common.js'
 
 export default {
   name: 'App',
@@ -98,7 +98,18 @@ export default {
       }
     }
     else {
-      jsonDatas.forEach(item => this.pistes.set(item.id, item))
+      // const response = await getAllPistes()
+      // response.forEach(item => {
+      //   this.pistes.set(item.id, item)
+      // })
+      // console.log(response)
+      // this.calculateState()
+      // this.saveAllPistes()
+
+      jsonDatas.forEach(item => {
+        this.pistes.set(item.id, item)
+      })
+      // console.log(this.pistes)
       this.calculateState()
       this.saveAllPistes()
     }
