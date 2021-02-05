@@ -12,9 +12,6 @@
     "parcel-bundler": "^1.12.4",
     "vue-template-compiler": "^2.6.12"
   },
-  "browserslist": [
-    "last 1 Chrome version"
-  ],
   "scripts": {
     "dev": "parcel src/index.html",
     "watch": "parcel watch src/index.html",
@@ -24,12 +21,8 @@
     "type": "git",
     "url": "git+https://github.com/ShayanTavaril/jobsApplyingManager.git"
   },
-  "alias": {
-    "vue": "./node_modules/vue/dist/vue.common.js"
-  },
-  "keywords": [],
   "author": "ShayanTavaril",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ShayanTavaril/jobsApplyingManager/issues"
   },
