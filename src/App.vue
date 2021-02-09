@@ -57,8 +57,7 @@
 <script>
 import PopIn from './components/PopIn.vue'
 import PisteLine from './components/tableLine/PisteLine.vue'
-import { jsonDatas } from '../server/assets/data.js'
-import { deepCopy, getAllPistes } from './common.js'
+import { deepCopy } from './common.js'
 
 export default {
   name: 'App',
@@ -87,34 +86,56 @@ export default {
     }
   },
   beforeMount() {
-    const storage = localStorage.getItem('pistes')
-    if (storage !== null && storage !== undefined) {
-      try {
-        this.pistes = new Map(JSON.parse(storage))
-        this.calculateState()
-      } catch (e) {
-        localStorage.removeItem('pistes')
-        console.error(e.message)
-      }
-    }
-    else {
-      // const response = await getAllPistes()
-      // response.forEach(item => {
-      //   this.pistes.set(item.id, item)
-      // })
-      // console.log(response)
-      // this.calculateState()
-      // this.saveAllPistes()
+    // const storage = localStorage.getItem('pistes')
+    // if (storage !== null && storage !== undefined) {
+    //   try {
+    //     this.pistes = new Map(JSON.parse(storage))
+    //     this.calculateState()
+    //   } catch (e) {
+    //     localStorage.removeItem('pistes')
+    //     console.error(e.message)
+    //   }
+    // }
+    // else {
+    //   // const response = await getAllPistes()
+    //   // response.forEach(item => {
+    //   //   this.pistes.set(item.id, item)
+    //   // })
+    //   // console.log(response)
+    //   // this.calculateState()
+    //   // this.saveAllPistes()
+    //   jsonDatas.forEach(item => {
+    //     this.pistes.set(item.id, item)
+    //   })
+    //   // console.log(this.pistes)
+    //   this.calculateState()
+    //   this.saveAllPistes()
+    // }
 
-      jsonDatas.forEach(item => {
-        this.pistes.set(item.id, item)
-      })
-      // console.log(this.pistes)
-      this.calculateState()
-      this.saveAllPistes()
-    }
+
+    // Revoir la gestion du localStorage
+    this.getAllPistes()
   },
   methods: {
+    getAllPistes() {
+      localStorage.setItem('access-token', new URL(document.location).searchParams.get('access-token'))
+      const optReq = {
+        method: 'GET',
+        headers: new Headers({ 'access-token': localStorage.getItem('access-token') })
+      }
+      fetch('/api/pistes', optReq).then((response) => {
+        return response.json()
+      }).then((datas) => {
+        this.pistes = new Map()
+        for (const item of datas) {
+          this.pistes.set(item.id, item)
+        }
+        this.calculateState()
+        this.saveAllPistes()
+      }).catch((err) => {
+        throw err
+      })
+    },
     openPopin(isNewItem, piste) {
       this.isNewItem = isNewItem
       if (!isNewItem) {
