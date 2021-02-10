@@ -71,7 +71,8 @@ export default {
       pisteToModify: undefined,
       idsToDelete: new Set(),
       pistes: new Map(),
-      deleteButtonDisabled: 0
+      deleteButtonDisabled: 0,
+      token: null
     }
   },
   computed: {
@@ -97,19 +98,19 @@ export default {
     //   }
     // }
     // else {
-    //   // const response = await getAllPistes()
-    //   // response.forEach(item => {
-    //   //   this.pistes.set(item.id, item)
-    //   // })
-    //   // console.log(response)
-    //   // this.calculateState()
-    //   // this.saveAllPistes()
-    //   jsonDatas.forEach(item => {
+    //   const response = await getAllPistes()
+    //   response.forEach(item => {
     //     this.pistes.set(item.id, item)
     //   })
-    //   // console.log(this.pistes)
+    //   console.log(response)
     //   this.calculateState()
     //   this.saveAllPistes()
+    //   // jsonDatas.forEach(item => {
+    //   //   this.pistes.set(item.id, item)
+    //   // })
+    //   // console.log(this.pistes)
+    //   // this.calculateState()
+    //   // this.saveAllPistes()
     // }
 
 
@@ -118,10 +119,11 @@ export default {
   },
   methods: {
     getAllPistes() {
-      localStorage.setItem('access-token', new URL(document.location).searchParams.get('access-token'))
+      // localStorage.setItem('access-token', new URL(document.location).searchParams.get('access-token'))
+      this.token = new URL(document.location).searchParams.get('access-token')
       const optReq = {
         method: 'GET',
-        headers: new Headers({ 'access-token': localStorage.getItem('access-token') })
+        headers: new Headers({ 'access-token': this.token })
       }
       fetch('/api/pistes', optReq).then((response) => {
         return response.json()
@@ -185,8 +187,22 @@ export default {
     },
     saveAllPistes() {
       // Mise à jour du localStorage
-      const parsedPistes = JSON.stringify(Array.from(this.pistes))
-      localStorage.setItem('pistes', parsedPistes)
+      // const parsedPistes = JSON.stringify(Array.from(this.pistes))
+      // localStorage.setItem('pistes', parsedPistes)
+      const datas = JSON.stringify(this.mapToArray(this.pistes, true))
+      const optReq = {
+        method: 'POST',
+        headers: new Headers({
+          'access-token': this.token,
+          'Content-Type': 'application/json',
+          'Content-Length': datas.length
+        }),
+        body: datas
+      }
+      fetch('/api/update/pistes', optReq)
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+        .catch((err) => console.log(err))
     },
     calculateState() {
       // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
@@ -206,6 +222,21 @@ export default {
           else p.etat = 'Terminée'
         }
       }
+    },
+    mapToArray(obj, arrayWanted) {
+      let newObj
+      if (arrayWanted) {
+        newObj = []
+        for (const item of obj.values()) {
+          newObj.push(item)
+        }
+      } else {
+        newObj = new Map()
+        for (const item of obj) {
+          newObj.set(item.id, item)
+        }
+      }
+      return newObj
     }
   }
 }

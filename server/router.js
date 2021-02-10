@@ -1,9 +1,7 @@
-const { rejects } = require('assert')
 const fs = require('fs')
 const https = require('https')
-const { resolve } = require('path')
 const { clientId, clientSecret } = require('../key.json')
-const { createFileIfNotExist } = require('./datasManager')
+const { createFileIfNotExist, updateContent } = require('./datasManager')
 const basePath = 'dist/'
 const servPath = 'server/'
 
@@ -76,6 +74,20 @@ class Router {
         this.sendFile(res, extension, basePath, fileName)
       }
     }
+    else {
+      if (fileName === '/api/update/pistes') {
+        this.checkToken(req.headers['access-token'])
+          .then(idLogin => {
+            let concatedDatas = Buffer.alloc(0)
+            req.on('data', datas => {
+              concatedDatas = Buffer.concat([concatedDatas, datas])
+            })
+            req.on('end', () => {
+              updateContent(`${servPath}assets/datas${idLogin}.json`, concatedDatas.toString())
+            })
+          })
+      }
+    }
   }
 
   sendFile(res, extension, path, fileName) {
@@ -98,14 +110,14 @@ class Router {
 
     return new Promise((resolve, reject) => {
       https.request(opt, response => {
-        let data = Buffer.alloc(0)
+        let concatedDatas = Buffer.alloc(0)
 
         response.on('data', datas => {
-          data = Buffer.concat([data, datas])
+          concatedDatas = Buffer.concat([concatedDatas, datas])
         })
         response.on('end', () => {
-          data = JSON.parse(data.toString())
-          if (data.id !== undefined) resolve(data.id)
+          concatedDatas = JSON.parse(concatedDatas.toString())
+          if (concatedDatas.id !== undefined) resolve(concatedDatas.id)
           reject('bad token')
         })
       }).end()
