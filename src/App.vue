@@ -57,7 +57,6 @@
 <script>
 import PopIn from './components/PopIn.vue'
 import PisteLine from './components/tableLine/PisteLine.vue'
-import { jsonDatas } from '../assets/data.js'
 import { deepCopy } from './common.js'
 
 export default {
@@ -72,7 +71,8 @@ export default {
       pisteToModify: undefined,
       idsToDelete: new Set(),
       pistes: new Map(),
-      deleteButtonDisabled: 0
+      deleteButtonDisabled: 0,
+      token: null
     }
   },
   computed: {
@@ -87,23 +87,31 @@ export default {
     }
   },
   beforeMount() {
-    const storage = localStorage.getItem('pistes')
-    if (storage !== null && storage !== undefined) {
-      try {
-        this.pistes = new Map(JSON.parse(storage))
-        this.calculateState()
-      } catch (e) {
-        localStorage.removeItem('pistes')
-        console.error(e.message)
-      }
-    }
-    else {
-      jsonDatas.forEach(item => this.pistes.set(item.id, item))
-      this.calculateState()
-      this.saveAllPistes()
-    }
+    this.getAllPistes()
   },
   methods: {
+    getAllPistes() {
+      this.token = new URL(document.location).searchParams.get('access-token')
+      const optReq = {
+        method: 'GET',
+        headers: new Headers({ 'access-token': this.token })
+      }
+      fetch('/api/pistes', optReq)
+        .then((response) => {
+          return response.json()
+        })
+        .then((datas) => {
+          this.pistes = new Map()
+          for (const item of datas) {
+            this.pistes.set(item.id, item)
+          }
+          this.calculateState()
+          this.saveAllPistes()
+        })
+        .catch((err) => {
+          throw err
+        })
+    },
     openPopin(isNewItem, piste) {
       this.isNewItem = isNewItem
       if (!isNewItem) {
@@ -152,9 +160,18 @@ export default {
       this.deleteButtonDisabled = this.idsToDelete.size
     },
     saveAllPistes() {
-      // Mise à jour du localStorage
-      const parsedPistes = JSON.stringify(Array.from(this.pistes))
-      localStorage.setItem('pistes', parsedPistes)
+      const datas = JSON.stringify(this.mapToArray(this.pistes, true))
+      const optReq = {
+        method: 'POST',
+        headers: new Headers({
+          'access-token': this.token,
+          'Content-Type': 'application/json',
+          'Content-Length': datas.length
+        }),
+        body: datas
+      }
+      fetch('/api/update/pistes', optReq)
+        .catch((err) => console.log(err))
     },
     calculateState() {
       // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
@@ -174,6 +191,21 @@ export default {
           else p.etat = 'Terminée'
         }
       }
+    },
+    mapToArray(obj, arrayWanted) {
+      let newObj
+      if (arrayWanted) {
+        newObj = []
+        for (const item of obj.values()) {
+          newObj.push(item)
+        }
+      } else {
+        newObj = new Map()
+        for (const item of obj) {
+          newObj.set(item.id, item)
+        }
+      }
+      return newObj
     }
   }
 }

@@ -21,12 +21,8 @@
     "type": "git",
     "url": "git+https://github.com/ShayanTavaril/jobsApplyingManager.git"
   },
-  "alias": {
-    "vue": "./node_modules/vue/dist/vue.common.js"
-  },
-  "keywords": [],
   "author": "ShayanTavaril",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ShayanTavaril/jobsApplyingManager/issues"
   },
