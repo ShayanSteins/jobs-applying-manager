@@ -5,12 +5,12 @@
 2. [Technologies](#technologies)
 3. [Installation](#installation)
 4. [Configuration](#configuration)
-5. [Utilisation](#utilisation)
-  5.1 [Client](#client)
-  5.2 [Serveur](#serveur)
-6. [Changelog](#changelog)
-  6.1 [v2.0](#v2.0)
-  6.2 [v1.0](#v1.0)
+5. [Utilisation](#utilisation)  
+  5.1 [Client](#client)  
+  5.2 [Serveur](#serveur)  
+6. [Changelog](#changelog)  
+  6.1 [v2.0](#v20)  
+  6.2 [v1.0](#v10)  
 
 
 ## Informations générales
@@ -21,11 +21,12 @@ Ainsi il est possible de saisir les différentes opportunités qui vous intéres
 
 ## Technologies
 
-- [VueJS](https://vuejs.org/)
-- [Parcel](https://parceljs.org/)
+- [VueJS - v2.6.12](https://vuejs.org/)
+- [NodeJS - v14.15.4](https://nodejs.org/en/)
+- [Parcel Bundler - 1.12.4](https://parceljs.org/)
 
 
-## Installation pour dev
+## Installation
 
 1. Lancez la commande :  
 
@@ -35,7 +36,7 @@ Ainsi il est possible de saisir les différentes opportunités qui vous intéres
 
 2. Générez les certificats https
 
-3. Créez une application OAuth sur votre GitHub (cf: [Create OAuth Apps](#https://docs.github.com/en/developers/apps/creating-an-oauth-app)).
+3. Créez une application OAuth sur votre GitHub (cf: [Create OAuth Apps](https://docs.github.com/en/developers/apps/creating-an-oauth-app)).
 
 
 ## Configuration
@@ -77,7 +78,7 @@ Lancez la commande suivante pour démarrer le serveur :
 
 ## Changelog
 
-### v2.0
+### v2.0  
 
 Les modifications suivantes ont été apportées à la version 2 : 
 
@@ -87,7 +88,7 @@ Les modifications suivantes ont été apportées à la version 2 :
 - Modification des données répercutées dans ces fichiers json
 - Suppression du LocalStorage
 
-### v1.0
+### v1.0  
 
 La première version de l'outil contient : 
 
