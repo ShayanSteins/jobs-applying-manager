@@ -1,10 +1,16 @@
 const fs = require('fs')
 const https = require('https')
-const { clientId, clientSecret } = require('../key.json')
 const { createFileIfNotExist, updateContent } = require('./datasManager')
-const basePath = 'dist/'
-const servPath = 'server/'
+const conf = require('./assets/config.json')
+const { clientId, clientSecret } = require(conf.OAuthKeysPath)
 
+// chemin d'accès au dossier de build de parcel
+const basePath = conf.basePath
+
+// chemin d'accès au dossier server
+const servPath = conf.servPath
+
+// Types MIME
 const mimeType = {
   css: 'text/css',
   js: 'application/javascript',
@@ -13,19 +19,27 @@ const mimeType = {
   json: 'application/json'
 }
 
+/**
+ * Routeur web
+ * @property {String} distPath : chemin d'accès au dossier dist (parcel)
+ */
 class Router {
+
+  /**
+   * Gestionnaire de routes et requêtes HTTPS
+   * @param {Request} req : requête à router
+   * @param {Response} res : réponse reçue
+   */
   handle(req, res) {
-    const url = new URL(req.url, `http://${req.headers.host}`)
+    const url = new URL(req.url, `https://${req.headers.host}`)
     const fileName = url.pathname
     const extension = fileName.split('.')[fileName.split('.').length - 1]
 
-    console.log('File Name = ' + fileName)
-
     if (req.method === 'GET') {
-      if (fileName === '/') {
+      if (fileName === '/') { // Redirection vers la connexion GitHub si non authentifié
         res.writeHead(301, { Location: `https://github.com/login/oauth/authorize?client_id=${clientId}` })
         res.end()
-      } else if (fileName.match(/^(\/oauth-callback)/) !== null) {
+      } else if (fileName.match(/^(\/oauth-callback)/) !== null) { // Récupération du code temporaire et demande d'acces_token
         if (url.searchParams.get('code')) {
           const body = JSON.stringify({
             client_id: clientId,
@@ -47,7 +61,7 @@ class Router {
           https.request(opt, response => {
             response.on('data', datas => {
               datas = JSON.parse(datas.toString())
-              res.writeHead(301, { Location: `http://${req.headers.host}/index.html?access-token=${datas.access_token}` })
+              res.writeHead(301, { Location: `https://${req.headers.host}/index.html?access-token=${datas.access_token}` })
               res.end()
             })
           }).end(body)
@@ -55,7 +69,7 @@ class Router {
           res.statusCode = 403
           res.end('403 - Access denied')
         }
-      } else if (fileName === '/api/pistes') {
+      } else if (fileName === '/api/pistes') { // Récupération des données du fichier utilisateur
         this.checkToken(req.headers['access-token'])
           .then(idLogin => {
             createFileIfNotExist(servPath + 'assets/', `datas${idLogin}.json`)
@@ -66,16 +80,16 @@ class Router {
             res.end('403 - Access denied')
           })
 
-      } else if (!fs.existsSync(basePath + fileName)) {
+      } else if (!fs.existsSync(basePath + fileName)) { // Erreur 404
         res.statusCode = 404
         res.setHeader('Content-Type', 'text/html')
         res.end('404 - File not found... (T-T)')
-      } else {
+      } else { // Cas nominal des fichiers html, js, css, images
         this.sendFile(res, extension, basePath, fileName)
       }
     }
     else {
-      if (fileName === '/api/update/pistes') {
+      if (fileName === '/api/update/pistes') { // Mise à jour des données du fichier utilisateur
         this.checkToken(req.headers['access-token'])
           .then(idLogin => {
             let concatedDatas = Buffer.alloc(0)
@@ -90,12 +104,23 @@ class Router {
     }
   }
 
+  /**
+   * Construit la réponse et l'envoie
+   * @param {Response} res : réponse du serveur
+   * @param {string} extension : extension du fichier
+   * @param {string} path : chemin d'accès au fichier
+   * @param {string} fileName : nom du fichier
+   */
   sendFile(res, extension, path, fileName) {
     res.statusCode = 200
     res.setHeader('Content-Type', mimeType[extension])
     res.end(fs.readFileSync(path + fileName))
   }
 
+  /**
+   * Vérifie que le token de l'utilisateur est toujours valide via une requête HTTPS vers l'OAuth de Github
+   * @param {string} token : token d'accès de l'utilisateur
+   */
   checkToken(token) {
     const opt = {
       port: 443,

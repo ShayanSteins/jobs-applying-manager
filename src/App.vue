@@ -87,56 +87,30 @@ export default {
     }
   },
   beforeMount() {
-    // const storage = localStorage.getItem('pistes')
-    // if (storage !== null && storage !== undefined) {
-    //   try {
-    //     this.pistes = new Map(JSON.parse(storage))
-    //     this.calculateState()
-    //   } catch (e) {
-    //     localStorage.removeItem('pistes')
-    //     console.error(e.message)
-    //   }
-    // }
-    // else {
-    //   const response = await getAllPistes()
-    //   response.forEach(item => {
-    //     this.pistes.set(item.id, item)
-    //   })
-    //   console.log(response)
-    //   this.calculateState()
-    //   this.saveAllPistes()
-    //   // jsonDatas.forEach(item => {
-    //   //   this.pistes.set(item.id, item)
-    //   // })
-    //   // console.log(this.pistes)
-    //   // this.calculateState()
-    //   // this.saveAllPistes()
-    // }
-
-
-    // Revoir la gestion du localStorage
     this.getAllPistes()
   },
   methods: {
     getAllPistes() {
-      // localStorage.setItem('access-token', new URL(document.location).searchParams.get('access-token'))
       this.token = new URL(document.location).searchParams.get('access-token')
       const optReq = {
         method: 'GET',
         headers: new Headers({ 'access-token': this.token })
       }
-      fetch('/api/pistes', optReq).then((response) => {
-        return response.json()
-      }).then((datas) => {
-        this.pistes = new Map()
-        for (const item of datas) {
-          this.pistes.set(item.id, item)
-        }
-        this.calculateState()
-        this.saveAllPistes()
-      }).catch((err) => {
-        throw err
-      })
+      fetch('/api/pistes', optReq)
+        .then((response) => {
+          return response.json()
+        })
+        .then((datas) => {
+          this.pistes = new Map()
+          for (const item of datas) {
+            this.pistes.set(item.id, item)
+          }
+          this.calculateState()
+          this.saveAllPistes()
+        })
+        .catch((err) => {
+          throw err
+        })
     },
     openPopin(isNewItem, piste) {
       this.isNewItem = isNewItem
@@ -186,9 +160,6 @@ export default {
       this.deleteButtonDisabled = this.idsToDelete.size
     },
     saveAllPistes() {
-      // Mise à jour du localStorage
-      // const parsedPistes = JSON.stringify(Array.from(this.pistes))
-      // localStorage.setItem('pistes', parsedPistes)
       const datas = JSON.stringify(this.mapToArray(this.pistes, true))
       const optReq = {
         method: 'POST',
@@ -200,8 +171,6 @@ export default {
         body: datas
       }
       fetch('/api/update/pistes', optReq)
-        .then((response) => response.json())
-        .then((data) => console.log(data))
         .catch((err) => console.log(err))
     },
     calculateState() {

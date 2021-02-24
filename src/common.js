@@ -1,18 +1,3 @@
-export async function getAllPistes() {
-  console.log('lancement du fetch')
-  const res = await fetch('/api/pistes')
-  // console.log(res.json())
-  // return await res.json()
-
-
-
-  // fetch('/api/pistes')
-  //   .then(response => response.json())
-  //   .then(data => console.log(data))
-
-  return res.json()
-}
-
 /**
  * Génération d'un ID unique
  */
