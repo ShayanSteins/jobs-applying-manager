@@ -1,5 +1,7 @@
 # JobsApplyingManager
 
+English version [here](README_en.md).
+
 ## Table des matières
 1. [Informations générales](#informations-générales)
 2. [Technologies](#technologies)
@@ -41,7 +43,7 @@ Ainsi il est possible de saisir les différentes opportunités qui vous intéres
 
 ## Configuration
 
-Modifiez le fichier de configuration [config.json](#server/assets/config.json) selon vos besoins :
+Modifiez le fichier de configuration [config.json](/server/assets/config.json) selon vos besoins :
 
 ```json
 {
@@ -92,6 +94,6 @@ Les modifications suivantes ont été apportées à la version 2 :
 
 La première version de l'outil contient : 
 
-- Un tableau de bords permetant d'afficher l'ensemble des pistes ainsi que les prochains rendez-vous à venir
+- Un tableau de bord permetant d'afficher l'ensemble des pistes ainsi que les prochains rendez-vous à venir
 - L'ajout, la modification et la suppression de piste et de rendez-vous
 - Un historique des champs modifiés pour chaque piste.
