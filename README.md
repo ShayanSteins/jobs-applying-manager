@@ -38,6 +38,10 @@ Ainsi il est possible de saisir les différentes opportunités qui vous intéres
 
 2. Générez les certificats https
 
+    ```
+    sudo openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+    ```
+
 3. Créez une application OAuth sur votre GitHub (cf: [Create OAuth Apps](https://docs.github.com/en/developers/apps/creating-an-oauth-app)).
 
 
