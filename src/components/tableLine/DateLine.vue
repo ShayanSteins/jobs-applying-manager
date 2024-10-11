@@ -2,7 +2,7 @@
   <tr>
     <td>{{ dateLine.type }}</td>
     <td>{{ formatedDate }}</td>
-    <td>      
+    <td>
       <CheckboxInput labelName="" v-model="dateLine.retour"></CheckboxInput>
     </td>
     <td>
@@ -11,25 +11,15 @@
   </tr>
 </template>
 
-<script>
-import CheckboxInput from "../formComponents/CheckboxInput.vue"
+<script setup>
+import CheckboxInput from '../formComponents/CheckboxInput.vue'
+import { computed } from 'vue'
 
-export default {
-  name: 'DateLine',
-  components: {
-    CheckboxInput
-  },
-  props: {
-    dateLine: {
-      type: Object
-    }
-  },
-  computed: {
-    formatedDate: function () {
-      return new Date(this.dateLine.date).toLocaleString()
-    }
-  }
-}
+const props = defineProps({ 'dateLine': Object })
+
+const formatedDate = computed(() => {
+  return new Date(props.dateLine.date).toLocaleString()
+})
 </script>
 
 <style scoped>
@@ -37,6 +27,7 @@ td {
   font-size: 0.8em;
   color: var(--main-bg-color);
 }
+
 button {
   padding: revert;
 }
