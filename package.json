@@ -1,18 +1,15 @@
 {
-  "name": "jobsApplyingManager",
-  "version": "1.0.0",
+  "name": "jobs-applying-manager",
+  "version": "2.0.0",
   "description": "",
   "private": true,
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
     "parcel": "^2.12.0",
-    "vue": "^2.6.12",
-    "vue-hot-reload-api": "^2.3.4"
+    "vue": "^3.5.11"
   },
   "devDependencies": {
-    "@parcel/transformer-vue": "^2.12.0",
-    "@vue/component-compiler-utils": "^3.3.0",
-    "vue-template-compiler": "^0.1.0"
+    "@parcel/transformer-vue": "^2.12.0"
   },
   "scripts": {
     "dev": "parcel src/index.html",
@@ -21,12 +18,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ShayanTavaril/jobsApplyingManager.git"
+    "url": "git+https://github.com/ShayanTavaril/jobs-applying-manager.git"
   },
   "author": "ShayanTavaril",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ShayanTavaril/jobsApplyingManager/issues"
+    "url": "https://github.com/ShayanTavaril/jobs-applying-manager/issues"
   },
-  "homepage": "https://github.com/ShayanTavaril/jobsApplyingManager#readme"
+  "homepage": "https://github.com/ShayanTavaril/jobs-applying-manager#readme"
 }

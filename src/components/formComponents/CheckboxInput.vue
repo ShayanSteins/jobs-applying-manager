@@ -3,8 +3,8 @@
     <input
       type="checkbox"
       :id="inputName"
-      :checked="dataChecked"
-      @change="$emit('change', $event.target.checked)"
+      :checked="checked"
+      @change="$emit('update:checked', $event.target.checked)"
     />
     <label v-if="labelName" class="checkBoxLabel" :for="inputName">{{ labelName }}</label>
   </div>
@@ -13,10 +13,7 @@
 <script>
 export default {
   name: 'CheckboxInput',
-  model: {
-    prop: 'checked',
-    event: 'change'
-  },
+  model: ['update:checked'],
   props: {
     checked: {
       type: Boolean
@@ -25,7 +22,7 @@ export default {
   },
   data() {
     return {
-      dataChecked: this.checked,
+      // dataChecked: this.checked,
       inputName: this.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
     }
   }

@@ -16,7 +16,8 @@ const mimeType = {
   js: 'application/javascript',
   map: 'application/javascript',
   html: 'text/html',
-  json: 'application/json'
+  json: 'application/json',
+  svg: 'image/svg+xml'
 }
 
 /**

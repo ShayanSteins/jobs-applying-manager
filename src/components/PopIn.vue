@@ -6,20 +6,20 @@
       <form @submit="checkForm">
         <div class="wholePiste">
           <div class="left">
-            <TextInput inputType="text" labelName="Société" v-model="piste.societe" isRequired></TextInput>
-            <AvailableOptionsInput labelName="Technologies" v-model="piste.technos" :dataList="listTechno"></AvailableOptionsInput>
-            <TextInput inputType="url" labelName="Liens" v-model="piste.liens"></TextInput>
-            <DatesManager v-model="piste.dates" @change="updateDatesList"></DatesManager>
+            <TextInput inputType="text" labelName="Société" :value="piste.societe" isRequired></TextInput>
+            <AvailableOptionsInput labelName="Technologies" :value="piste.technos" :dataList="listTechno"></AvailableOptionsInput>
+            <TextInput inputType="url" labelName="Liens" :value="piste.liens"></TextInput>
+            <DatesManager :value="piste.dates" @change="updateDatesList"></DatesManager>
           </div>
           <div class="right">
-            <TextInput inputType="text" labelName="Etat" isDisabled v-model="piste.etat"></TextInput>
-            <TextInput inputType="text" labelName="Interlocuteur" v-model="piste.interlocuteur"></TextInput>
-            <TextInput inputType="text" labelName="Localisation" v-model="piste.localisation"></TextInput>
-            <CheckboxInput v-if="!isNewItem" labelName="Fermée" v-model="piste.closed"></CheckboxInput>
+            <TextInput inputType="text" labelName="Etat" isDisabled :value="piste.etat"></TextInput>
+            <TextInput inputType="text" labelName="Interlocuteur" :value="piste.interlocuteur"></TextInput>
+            <TextInput inputType="text" labelName="Localisation" :value="piste.localisation"></TextInput>
+            <CheckboxInput v-if="!isNewItem" labelName="Fermée" v-model:checked="piste.closed"></CheckboxInput>
           </div>
         </div>
         <div class="middle">
-          <TextInput inputType="textarea" labelName="Notes" v-model="piste.notes"></TextInput>
+          <TextInput inputType="textarea" labelName="Notes" :value="piste.notes"></TextInput>
         </div>
         <div class="histContainer" v-if="piste.historique">
           <h2>Historique</h2>
@@ -45,6 +45,8 @@ import AvailableOptionsInput from './formComponents/AvailableOptionsInput.vue'
 import CheckboxInput from './formComponents/CheckboxInput.vue'
 import HistoriqueLine from './tableLine/HistoriqueLine.vue'
 import { createUUID, deepCopy, deepComparison } from "../common.js"
+
+import { ref } from "vue";
 
 export default {
   name: 'PopIn',

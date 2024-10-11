@@ -1,4 +1,4 @@
-# JobsApplyingManager
+# jobs-applying-manager
 
 English version [here](README_en.md).
 
@@ -17,7 +17,7 @@ English version [here](README_en.md).
 
 ## Informations générales
 
-JobsApplyingManager est une application d'aide à la recherche d'emploi via un tableau de suivi de piste.  
+jobs-applying-manager est une application d'aide à la recherche d'emploi via un tableau de suivi de piste.  
 Ainsi il est possible de saisir les différentes opportunités qui vous intéresse et de visualiser d'un seul coup d'oeil l'avancé de chacune.
 
 
@@ -39,7 +39,7 @@ Ainsi il est possible de saisir les différentes opportunités qui vous intéres
 2. Générez les certificats https
 
     ```
-    sudo openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+    sudo openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' -keyout key.pem -out cert.pem 
     ```
 
 3. Créez une application OAuth sur votre GitHub (cf: [Create OAuth Apps](https://docs.github.com/en/developers/apps/creating-an-oauth-app)).
