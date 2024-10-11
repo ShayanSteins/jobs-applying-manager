@@ -7,26 +7,22 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'SelectInput',
-  props: {
-    value: {
-      type: String,
-      default: ''
-    }
-  },
-  data () {
-    return {
-      options: [
-        "Postulation",
-        "Entretient RH",
-        "Entretient Tech",
-        "Autre entretient"
-      ]
-    }
+<script setup>
+import { ref } from 'vue'
+
+const props = defineProps({
+  value: {
+    type: String,
+    default: ''
   }
-}
+})
+
+const options = ref([
+  "Postulation",
+  "Entretient RH",
+  "Entretient Tech",
+  "Autre entretient"
+])
 </script>
 
 <style scoped>

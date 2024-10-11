@@ -3,33 +3,28 @@
     <input
       type="checkbox"
       :id="inputName"
-      :checked="dataChecked"
-      @change="$emit('change', $event.target.checked)"
+      :checked="checked"
+      @change="$emit('update:checked', $event.target.checked)"
     />
     <label v-if="labelName" class="checkBoxLabel" :for="inputName">{{ labelName }}</label>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'CheckboxInput',
-  model: {
-    prop: 'checked',
-    event: 'change'
-  },
-  props: {
-    checked: {
+<script setup>
+import { ref } from 'vue'
+
+const props = defineProps({
+  checked: {
       type: Boolean
     },
     labelName: String,
-  },
-  data() {
-    return {
-      dataChecked: this.checked,
-      inputName: this.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-    }
-  }
-}
+  })
+
+const inputName = ref(props.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, ""))
+// const dataChecked = ref(props.checked)
+
+const emit = defineEmits(['update:checked'])
+
 </script>
 
 <style scoped>

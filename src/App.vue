@@ -5,24 +5,12 @@
     </header>
     <main>
       <button @click="openPopin(true)">Nouveau</button>
-      <button
-        class="deleteButton"
-        @click="removePiste"
-        :disabled="deleteButtonDisabled === 0"
-      >
+      <button class="deleteButton" @click="removePiste" :disabled="deleteButtonDisabled === 0">
         Supprimer
       </button>
       <transition name="fade">
-        <PopIn
-          v-if="popInDisplayed"
-          :isNewItem="isNewItem"
-          :pisteToModify="pisteToModify"
-          @close="closePopin"
-          @delete="removePiste"
-          @check="checkedPiste"
-          @save="savePiste"
-          :listTechno="technologiesList"
-        ></PopIn>
+        <PopIn v-if="popInDisplayed" :isNewItem="isNewItem" :pisteToModify="pisteToModify" @close="closePopin"
+          @delete="removePiste" @check="checkedPiste" @save="savePiste" :listTechno="technologiesList"></PopIn>
       </transition>
       <div class="boardContent">
         <table class="shadow">
@@ -40,13 +28,8 @@
               parcourir les sites d'annonces
             </td>
           </tr>
-          <PisteLine
-            v-for="[id, piste] in pistes"
-            :key="id"
-            :piste="piste"
-            @open-popin="openPopin"
-            @check="checkedPiste"
-          ></PisteLine>
+          <PisteLine v-for="[id, piste] in pistes" :key="id" :piste="piste" @open-popin="openPopin"
+            @check="checkedPiste"></PisteLine>
         </table>
         <div class="notif">Notifications</div>
       </div>
@@ -222,6 +205,7 @@ export default {
   --main-red: rgb(161, 27, 27);
   --shadow-element: 3px 5px 12px rgb(21 21 21 / 78%);
 }
+
 body {
   font: 1.2em Helvetica, Arial, sans-serif;
   color: var(--main-text-color);
@@ -229,6 +213,7 @@ body {
   margin: 0;
   background-color: var(--main-bg-color);
 }
+
 header {
   width: 100%;
   padding: 0.5em 0;
@@ -236,6 +221,7 @@ header {
   font-size: 2em;
   background-color: var(--main-violet);
 }
+
 main {
   padding: 20px;
 }
@@ -247,16 +233,20 @@ button {
   border: none;
   padding: 10px 15px;
 }
+
 button.deleteButton {
   background-color: var(--main-red);
 }
+
 button:hover {
   cursor: pointer;
   filter: brightness(1.2);
 }
+
 button:disabled {
   filter: opacity(0.5);
 }
+
 button:focus {
   outline: none;
 }
@@ -266,24 +256,29 @@ button:focus {
   flex-flow: row wrap;
   justify-content: space-around;
 }
+
 table {
   margin: 20px 20px 0 0;
   border-collapse: collapse;
   flex-grow: 3;
   color: var(--main-bg-color);
 }
+
 tr:nth-child(even) {
   background-color: rgb(191 191 191);
 }
+
 tr:nth-child(odd) {
   background-color: rgb(217 217 217);
 }
+
 th {
   font-weight: lighter;
   height: 30px;
   background: var(--main-darker-bg-color);
   color: var(--main-lighter-violet);
 }
+
 th,
 td {
   padding: 10px;
@@ -303,18 +298,25 @@ td {
 .shadow {
   box-shadow: var(--shadow-element);
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+  {
   opacity: 0;
 }
 
 .wrapper {
   display: flex;
 }
-.wrapper > * {
+
+.wrapper>* {
   line-height: 1;
 }
 

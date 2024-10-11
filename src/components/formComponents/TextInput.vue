@@ -21,10 +21,10 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'TextInput',
-  props: {
+<script setup>
+import { ref } from 'vue'
+
+const props = defineProps({
     inputType: {
       type: String,
       default: 'text'
@@ -42,13 +42,10 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-  data() {
-    return {
-      inputName: this.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-    }
-  }
-}
+  })
+
+const inputName = ref(props.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, ""))
+
 </script>
 
 <style scoped>

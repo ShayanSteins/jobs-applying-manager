@@ -5,28 +5,21 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 
-export default {
-  name: 'HistoriqueLine',
-  props: {
-    histo: {
-      type: Object
-    }
-  },
-  computed: {
-    formatedDate: function () {
-      return new Date(this.histo.date).toLocaleString()
-    }
-  }
-}
+const props = defineProps({ 'histo': Object })
+
+const formatedDate = computed(() => new Date(props.histo.date).toLocaleString())
+
 </script>
 
 <style scoped>
-.container{
+.container {
   color: var(--main-lighter-bg-color);
   font-size: 0.8em;
 }
+
 .date {
   font-weight: bold;
 }
