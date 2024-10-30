@@ -1,4 +1,4 @@
-# JobsApplyingManager
+# jobs-applying-manager
 
 Version française [ici](README.md).
 
@@ -17,7 +17,7 @@ Version française [ici](README.md).
 
 ## Summary
 
-JobsApplyingManager is a job search helper app with a tracking table.
+jobs-applying-manager is a job search helper app with a tracking table.
 You'll be able to enter opportunities, their state or appointments to follow them better.
 
 

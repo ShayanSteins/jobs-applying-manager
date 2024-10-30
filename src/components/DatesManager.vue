@@ -23,60 +23,48 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import SelectInput from "./formComponents/SelectInput.vue"
 import DateTimeInput from "./formComponents/DateTimeInput.vue"
 import DateLine from "./tableLine/DateLine.vue"
-import {createUUID} from "../common.js"
+import { createUUID } from "../common.js"
+import { onMounted, ref, watch } from 'vue';
 
-export default {
-  name: 'DatesManager',
-  components: {
-    SelectInput, DateTimeInput, DateLine
-  },
-  props: {
-    value: {
-      type: Array,
-      default: () => []
-    }
-  },
-  data() {
-    return {
-      newDateType: '',
-      newDateTime: '',
-      dates: []
-    }
-  },
-  mounted() {
-    this.dates = this.value
-  },
-  watch: {
-    dates: {
-      handler: function () {       
-        this.$emit('change', this.dates)
-      },
-      deep: true
-    }
-  },
-  methods: {
-    addDate() {
-      if(this.newDateType !== null && this.newDateType !== '' && this.newDateTime !== null && this.newDateTime !== '') {
-        this.dates.push({
-          id: createUUID(),
-          type: this.newDateType,
-          date: new Date(this.newDateTime),
-          retour: false
-        })
-        this.newDateTime = ''
-        this.newDateType = ''
-      }
-    },
-    removeDate (idToRemove) {
-      this.dates = this.dates.filter(date => {
-        return date.id !== idToRemove
-      })
-    }
+const props = defineProps({
+  value: {
+    type: Array,
+    default: () => []
   }
+})
+
+const emit = defineEmits(['change'])
+
+const newDateTime = ref('')
+const newDateType = ref('')
+const dates = ref([])
+
+onMounted(() => {
+  dates.value = props.value
+})
+
+watch(dates, () => emit('change', dates))
+
+function addDate() {
+  if (newDateType.value !== null && newDateType.value !== '' && newDateTime.value !== null && newDateTime.value !== '') {
+    dates.value.push({
+      id: createUUID(),
+      type: newDateType.value,
+      date: new Date(newDateTime.value),
+      retour: false
+    })
+    newDateTime.value = ''
+    newDateType.value = ''
+  }
+}
+function removeDate(idToRemove) {
+  dates.value = dates.value.filter(date => {
+    return date.id !== idToRemove
+  })
 }
 </script>
 
@@ -86,24 +74,30 @@ export default {
   align-items: center;
   margin-top: 15px;
 }
+
 .dateTableContainer {
   margin-top: 7px;
 }
-.addDateContainer > * {
+
+.addDateContainer>* {
   margin-right: 10px;
 }
+
 button {
   padding: revert;
 }
+
 label,
 td {
   color: var(--main-bg-color);
   font-size: 0.8em;
 }
+
 table {
   margin: 0;
   width: 100%;
 }
+
 th {
   font-size: 0.8em;
   padding: 2px;

@@ -1,5 +1,7 @@
 node_modules
 dist
-.cache
+.parcel-cache
 .vscode
 key.json
+*-lock.json
+*.pem
