@@ -1,5 +1,5 @@
 <template>
-  <tr @click="(e) => { if (e.target.type !== 'checkbox') $emit('open-popin', false, piste) }"
+  <tr @click="(e) => { if (e.target.type !== 'checkbox') $emit('open-popin', true, piste) }"
     :class="{ closed: piste.closed }">
     <td>
       <CheckBoxInput labelName v-model="dataChecked" @change="$emit('check', [piste.id, $event])" />
@@ -27,6 +27,8 @@ const props = defineProps({
 })
 
 const dataChecked = ref(props.checked)
+
+defineEmits(['open-popin', 'check'])
 
 const getNextRdv = computed(() => {
   // Vérification du format des dates

@@ -4,7 +4,7 @@
       <span>Jobs Applying Manager</span>
     </header>
     <main>
-      <button @click="openPopin(true)">Nouveau</button>
+      <button @click="openPopin(false)">Nouveau</button>
       <button class="deleteButton" @click="removePiste" :disabled="deleteButtonDisabled === 0">
         Supprimer
       </button>
@@ -37,160 +37,157 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import PopIn from './components/PopIn.vue'
 import PisteLine from './components/tableLine/PisteLine.vue'
 import { deepCopy } from './common.js'
+import { computed, ref, onBeforeMount } from 'vue';
 
-export default {
-  name: 'App',
-  components: {
-    PopIn, PisteLine
-  },
-  data() {
-    return {
-      popInDisplayed: false,
-      isNewItem: true,
-      pisteToModify: undefined,
-      idsToDelete: new Set(),
-      pistes: new Map(),
-      deleteButtonDisabled: 0,
-      token: null
-    }
-  },
-  computed: {
-    technologiesList: function () {
-      const list = new Set()
-      for (const [key, val] of this.pistes) {
-        for (const techno of val.technos.split(', ')) {
-          list.add(techno)
-        }
-      }
-      return list
-    }
-  },
-  beforeMount() {
-    this.getAllPistes()
-  },
-  methods: {
-    getAllPistes() {
-      this.token = new URL(document.location).searchParams.get('access-token')
-      const optReq = {
-        method: 'GET',
-        headers: new Headers({ 'access-token': this.token })
-      }
-      fetch('/api/pistes', optReq)
-        .then((response) => {
-          return response.json()
-        })
-        .then((datas) => {
-          this.pistes = new Map()
-          for (const item of datas) {
-            this.pistes.set(item.id, item)
-          }
-          this.calculateState()
-          this.saveAllPistes()
-        })
-        .catch((err) => {
-          throw err
-        })
-    },
-    openPopin(isNewItem, piste) {
-      this.isNewItem = isNewItem
-      if (!isNewItem) {
-        this.pisteToModify = deepCopy(piste)
-      }
-      this.popInDisplayed = true
-    },
-    closePopin() {
-      this.pisteToModify = undefined
-      this.popInDisplayed = false
-    },
-    savePiste(pisteFromPopin) {
-      // Ajout - MAJ d'une piste dans la liste
-      if (!pisteFromPopin.hasOwnProperty('id')) {
-        return
-      }
-      this.pistes.set(pisteFromPopin.id, pisteFromPopin)
-      this.calculateState()
-      this.closePopin()
-      this.saveAllPistes()
-      this._computedWatchers['technologiesList'].run()
-    },
-    checkedPiste(data) {
-      // Gestion des checkbox du tableau
-      const [id, bool] = data
-      if (bool)
-        this.idsToDelete.add(id)
-      else
-        this.idsToDelete.delete(id)
-      this.deleteButtonDisabled = this.idsToDelete.size
-    },
-    removePiste(p) {
-      let oldSet = new Set()
+const popInDisplayed = ref(false)
+const isNewItem = ref(true)
+const pisteToModify = ref(undefined)
+const idsToDelete = ref(new Set())
+const pistes = ref(new Map())
+const deleteButtonDisabled = ref(0)
+const token = ref(null)
 
-      // Supression via la popin
-      if (p !== undefined && !(p instanceof MouseEvent)) {
-        if (this.idsToDelete.size > 0) // on conserve la sélection du tableau du main
-          oldSet = this.idsToDelete
-        this.idsToDelete = new Set([p.id])
-      }
-      this.idsToDelete.forEach(id => this.pistes.delete(id))
-
-      this.idsToDelete = oldSet
-      this.closePopin()
-      this.saveAllPistes()
-      this.deleteButtonDisabled = this.idsToDelete.size
-    },
-    saveAllPistes() {
-      const datas = JSON.stringify(this.mapToArray(this.pistes, true))
-      const optReq = {
-        method: 'POST',
-        headers: new Headers({
-          'access-token': this.token,
-          'Content-Type': 'application/json',
-          'Content-Length': datas.length
-        }),
-        body: datas
-      }
-      fetch('/api/update/pistes', optReq)
-        .catch((err) => console.log(err))
-    },
-    calculateState() {
-      // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
-      for (let [id, p] of this.pistes) {
-        if (p.closed) {
-          p.etat = 'Fermée'
-        }
-        else if (undefined !== p.dates && p.dates.length > 0) {
-          // récupère la dernière date insérée
-          let lastDate = p.dates[p.dates.length - 1]
-          // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : Etat = Postulée
-          if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) p.etat = 'Postulée'
-          // Si la date d'entretient n'est pas encore passée
-          else if (new Date(lastDate.date) > new Date()) p.etat = 'En attente d\'entretient'
-          // Si la date d'entretient est passée et que l'on n'a pas eu de retour
-          else if (new Date(lastDate.date) < new Date() && !lastDate.retour) p.etat = 'En attente de retour'
-          else p.etat = 'Terminée'
-        }
-      }
-    },
-    mapToArray(obj, arrayWanted) {
-      let newObj
-      if (arrayWanted) {
-        newObj = []
-        for (const item of obj.values()) {
-          newObj.push(item)
-        }
-      } else {
-        newObj = new Map()
-        for (const item of obj) {
-          newObj.set(item.id, item)
-        }
-      }
-      return newObj
+const technologiesList = computed(() => {
+  const list = new Set()
+  for (const [key, val] of pistes.value) {
+    for (const techno of val.technos.split(', ')) {
+      list.add(techno)
     }
   }
+  return list
+})
+
+onBeforeMount(() => {
+  getAllPistes()
+})
+
+function getAllPistes() {
+  token.value = new URL(document.location).searchParams.get('access-token')
+  const optReq = {
+    method: 'GET',
+    headers: new Headers({ 'access-token': token.value })
+  }
+  fetch('/api/pistes', optReq)
+    .then((response) => {
+      return response.json()
+    })
+    .then((datas) => {
+      pistes.value = new Map()
+      for (const item of datas) {
+        pistes.value.set(item.id, item)
+      }
+      calculateState()
+      saveAllPistes()
+    })
+    .catch((err) => {
+      throw err
+    })
+}
+
+function openPopin(isFromPisteTable, piste) {
+  isNewItem.value = !isFromPisteTable
+  if (isFromPisteTable) {
+    pisteToModify.value = deepCopy(piste)
+  }
+  popInDisplayed.value = true
+}
+
+function closePopin() {
+  pisteToModify.value = undefined
+  popInDisplayed.value = false
+}
+
+function savePiste(pisteFromPopin) {
+  // Ajout - MAJ d'une piste dans la liste
+  if (!pisteFromPopin.hasOwnProperty('id')) {
+    return
+  }
+  pistes.value.set(pisteFromPopin.id, pisteFromPopin)
+  calculateState()
+  closePopin()
+  saveAllPistes()
+}
+
+function checkedPiste(data) {
+  // Gestion des checkbox du tableau
+  const [id, bool] = data
+  if (bool)
+    idsToDelete.value.add(id)
+  else
+    idsToDelete.value.delete(id)
+  deleteButtonDisabled.value = idsToDelete.value.size
+}
+
+function removePiste(p) {
+  let oldSet = new Set()
+
+  // Supression via la popin
+  if (p !== undefined && !(p instanceof MouseEvent)) {
+    if (idsToDelete.value.size > 0) // on conserve la sélection du tableau du main
+      oldSet = idsToDelete.value
+    idsToDelete.value = new Set([p.id])
+  }
+  idsToDelete.value.forEach(id => pistes.value.delete(id))
+
+  idsToDelete.value = oldSet
+  closePopin()
+  saveAllPistes()
+  deleteButtonDisabled.value = idsToDelete.value.size
+}
+
+function saveAllPistes() {
+  const datas = JSON.stringify(mapToArray(pistes.value, true))
+  const optReq = {
+    method: 'POST',
+    headers: new Headers({
+      'access-token': token.value,
+      'Content-Type': 'application/json',
+      'Content-Length': datas.length
+    }),
+    body: datas
+  }
+  fetch('/api/update/pistes', optReq)
+    .catch((err) => console.log(err))
+}
+
+function calculateState() {
+  // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
+  for (let [id, p] of pistes.value) {
+    if (p.closed) {
+      p.etat = 'Fermée'
+    }
+    else if (undefined !== p.dates && p.dates.length > 0) {
+      // récupère la dernière date insérée
+      let lastDate = p.dates[p.dates.length - 1]
+      // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : Etat = Postulée
+      if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) p.etat = 'Postulée'
+      // Si la date d'entretient n'est pas encore passée
+      else if (new Date(lastDate.date) > new Date()) p.etat = 'En attente d\'entretient'
+      // Si la date d'entretient est passée et que l'on n'a pas eu de retour
+      else if (new Date(lastDate.date) < new Date() && !lastDate.retour) p.etat = 'En attente de retour'
+      else p.etat = 'Terminée'
+    }
+  }
+}
+
+function mapToArray(obj, arrayWanted) {
+  let newObj
+  if (arrayWanted) {
+    newObj = []
+    for (const item of obj.values()) {
+      newObj.push(item)
+    }
+  } else {
+    newObj = new Map()
+    for (const item of obj) {
+      newObj.set(item.id, item)
+    }
+  }
+  return newObj
 }
 </script>
 

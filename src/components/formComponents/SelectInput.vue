@@ -1,6 +1,6 @@
 <template>
   <div>
-    <select :value="value" @input="$emit('input', $event.target.value)">
+    <select v-model="selected">
       <option disabled value="">Choisissez...</option>
       <option v-for="(opt, index) in options" :key="index" :value="opt">{{ opt }}</option>
     </select>
@@ -8,21 +8,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 
-const props = defineProps({
-  value: {
-    type: String,
-    default: ''
-  }
-})
+const selected = defineModel()
 
-const options = ref([
+const options = [
   "Postulation",
   "Entretient RH",
   "Entretient Tech",
   "Autre entretient"
-])
+]
 </script>
 
 <style scoped>

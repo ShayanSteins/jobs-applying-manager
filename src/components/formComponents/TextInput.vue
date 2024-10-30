@@ -1,23 +1,16 @@
 <template>
   <div class="wrapper">
     <label :for="inputName" class="genericLabel">{{ labelName }}</label>
-    <textarea
-      v-if="inputType === 'textarea'"
-      :name="inputName"
-      :value="value"
-      @input="$emit('input', $event.target.value)"
-      rows="10"
-    ></textarea>
-    <input
-      v-else
-      class="genericInput"
-      :name="inputName"
-      :type="inputType"
-      :value="value"
-      @input="$emit('input', $event.target.value)"
+    <textarea v-if="inputType === 'textarea'" 
+      :name="inputName" 
+      v-model="value" 
+      rows="10"></textarea>
+    <input v-else class="genericInput" 
+      :name="inputName" 
+      :type="inputType" 
       :disabled="isDisabled"
-      :required="isRequired"
-    />
+      :required="isRequired" 
+      v-model="value" />
   </div>
 </template>
 
@@ -25,31 +18,28 @@
 import { ref } from 'vue'
 
 const props = defineProps({
-    inputType: {
-      type: String,
-      default: 'text'
-    },
-    labelName: String,
-    isRequired: {
-      type: Boolean,
-      default: false
-    },
-    value: {
-      type: String,
-      default: ''
-    },
-    isDisabled: {
-      type: Boolean,
-      default: false
-    }
-  })
+  inputType: {
+    type: String,
+    default: 'text'
+  },
+  labelName: String,
+  isRequired: {
+    type: Boolean,
+    default: false
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const value = defineModel()
 
 const inputName = ref(props.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, ""))
 
 </script>
 
 <style scoped>
-
 textarea {
   flex: 1 1 auto;
 }

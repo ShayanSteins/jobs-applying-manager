@@ -1,8 +1,14 @@
 <template>
   <div class="wrapper">
     <label :for="inputName" class="genericLabel">{{ labelName }}</label>
-    <input type="texte" :id="inputName" class="genericInput" autocomplete="false" :name="inputName" :value="value"
-      @input="$emit('input', $event.target.value)" @focus="displayDataList" @blur="hideDataList" />
+    <input type="texte" 
+      :id="inputName" 
+      class="genericInput" 
+      autocomplete="false" 
+      :name="inputName" 
+      v-model="selectedTechnologies"
+      @focus="displayDataList" 
+      @blur="hideDataList" />
     <datalist id="availableTechnologies">
       <option v-for="(opt, index) in dataList" :key="index" @click="addTechno" tabindex="-1">{{ opt }}</option>
     </datalist>
@@ -14,16 +20,14 @@ import { ref } from 'vue'
 
 const props = defineProps({
   labelName: String,
-  value: {
-    type: String,
-    default: ''
-  },
   dataList: {
     type: Set
   }
 })
 
 const inputName = ref(props.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, ""))
+
+const selectedTechnologies = defineModel()
 
 function displayDataList(event) {
   // Affichage des sugestions de technologies 
@@ -42,7 +46,7 @@ function hideDataList(event) {
 
 function addTechno(event) {
   // Ajout de la technologie sélectionnée
-  const input = document.getElementById(this.inputName)
+  const input = document.getElementById(inputName.value)
   if (input.value === '') {
     input.value = event.target.value
   } else {
