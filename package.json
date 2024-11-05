@@ -2,6 +2,7 @@
   "name": "jobs-applying-manager",
   "version": "2.0.0",
   "description": "",
+  "type": "module",
   "private": true,
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
@@ -9,12 +10,16 @@
     "vue": "^3.5.11"
   },
   "devDependencies": {
-    "@parcel/transformer-vue": "^2.12.0"
+    "@parcel/transformer-vue": "^2.12.0",
+    "@types/node": "^22.8.4",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "dev": "parcel src/index.html",
     "watch": "parcel watch src/index.html",
-    "build": "parcel build src/index.html --public-url ./"
+    "build": "parcel build src/index.html --public-url ./",
+    "serve": "npx tsx server/index.ts",
+    "check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -22,8 +27,11 @@
   },
   "author": "ShayanTavaril",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ShayanTavaril/jobs-applying-manager/issues"
-  },
-  "homepage": "https://github.com/ShayanTavaril/jobs-applying-manager#readme"
+  "prettier": {
+    "tabWidth": 2,
+    "printWidth": 80,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
 }

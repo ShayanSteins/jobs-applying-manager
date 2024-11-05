@@ -71,7 +71,7 @@ function getAllPistes() {
     method: 'GET',
     headers: new Headers({ 'access-token': token.value })
   }
-  fetch('/api/pistes', optReq)
+  fetch('/api/opportunities', optReq)
     .then((response) => {
       return response.json()
     })
@@ -81,7 +81,6 @@ function getAllPistes() {
         pistes.value.set(item.id, item)
       }
       calculateState()
-      saveAllPistes()
     })
     .catch((err) => {
       throw err
@@ -156,20 +155,20 @@ function saveAllPistes() {
 
 function calculateState() {
   // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
-  for (let [id, p] of pistes.value) {
-    if (p.closed) {
-      p.etat = 'Fermée'
+  for (let [id, piste] of pistes.value) {
+    if (piste.closed) {
+      piste.etat = 'Fermée'
     }
-    else if (undefined !== p.dates && p.dates.length > 0) {
+    else if (undefined !== piste.dates && piste.dates.length > 0) {
       // récupère la dernière date insérée
-      let lastDate = p.dates[p.dates.length - 1]
+      let lastDate = piste.dates[piste.dates.length - 1]
       // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : Etat = Postulée
-      if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) p.etat = 'Postulée'
+      if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) piste.etat = 'Postulée'
       // Si la date d'entretient n'est pas encore passée
-      else if (new Date(lastDate.date) > new Date()) p.etat = 'En attente d\'entretient'
+      else if (new Date(lastDate.date) > new Date()) piste.etat = 'En attente d\'entretient'
       // Si la date d'entretient est passée et que l'on n'a pas eu de retour
-      else if (new Date(lastDate.date) < new Date() && !lastDate.retour) p.etat = 'En attente de retour'
-      else p.etat = 'Terminée'
+      else if (new Date(lastDate.date) < new Date() && !lastDate.retour) piste.etat = 'En attente de retour'
+      else piste.etat = 'Terminée'
     }
   }
 }
