@@ -23,16 +23,16 @@ export function createUUID() {
 export function deepCopy(inObject) {
   let outObject, value, key
 
-  if ((typeof inObject !== "object" || inObject instanceof Date) || inObject === null) {
+  if (typeof inObject !== 'object' || inObject instanceof Date || inObject === null) {
     return inObject
   }
   outObject = Array.isArray(inObject) ? [] : {}
-  
+
   for (key in inObject) {
     value = inObject[key]
     outObject[key] = deepCopy(value)
   }
-  
+
   return outObject
 }
 
@@ -47,7 +47,7 @@ export function deepComparison(obj1, obj2) {
   for (const key in obj1) {
     const val1 = obj1[key]
     const val2 = obj2[key]
-    if(val1 !== val2) {
+    if (val1 !== val2) {
       if (typeof val1 === 'object' && typeof val2 === 'object') {
         const subComparison = deepComparison(val1, val2)
         if (subComparison.length > 0) modifications.push(key)

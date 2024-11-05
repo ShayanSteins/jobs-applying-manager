@@ -1,5 +1,5 @@
-const Server = require('./server')
-const Router = require('./router')
+import Server from './server.js'
+import Router from './router.js'
 
 try {
   new Server()
