@@ -1,5 +1,5 @@
-import Server from './server.js'
-import Router from './router.js'
+import Server from './server.ts'
+import Router from './router.ts'
 
 try {
   new Server()

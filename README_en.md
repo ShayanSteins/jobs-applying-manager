@@ -48,7 +48,7 @@ Modify the config file [config.json](#server/assets/config.json) according to yo
 ```json
 {
   "basePath" : <path to parcel build folder>, 
-  "servPath" : <path to app server folder>,
+  "serverPath" : <path to app server folder>,
   "keyPath" : <path to 'key.pem' file>,
   "certPath" : <path to 'cert.pem' file>,
   "port" : <server listening port>,

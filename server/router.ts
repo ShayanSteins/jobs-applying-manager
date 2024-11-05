@@ -1,12 +1,9 @@
 import https from 'https'
 import fs from 'fs'
 import { createFileIfNotExist, updateContent } from './datasManager'
-import conf from './assets/config.json'
+import { basePath, serverPath, dbPath, OAuthKeysPath } from './assets/config.json'
 import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'http'
-const { clientId, clientSecret } = await import(conf.OAuthKeysPath)
-
-const basePath: string = conf.basePath // path to parcel build folder
-const servPath: string = conf.servPath // path to server folder
+const { clientId, clientSecret } = await import(OAuthKeysPath)
 
 const mimeType = {
   css: 'text/css',
@@ -26,11 +23,7 @@ export default class Router {
     if (req.method === 'GET') {
       if (fileName === '/') {
         // Redirect to github Auth if user is not logged in yet
-        this.redirect(
-          res,
-          301,
-          `https://github.com/login/oauth/authorize?client_id=${clientId}`
-        )
+        this.redirect(res, 301, `https://github.com/login/oauth/authorize?client_id=${clientId}`)
       } else if (fileName.match(/^(\/oauth-callback)/) !== null) {
         // Temporary code recovery and access_token request
         const code = url.searchParams.get('code')
@@ -44,8 +37,8 @@ export default class Router {
         // Get user file data
         this.checkToken(req.headers)
           .then((loginId) => {
-            createFileIfNotExist(servPath + 'assets/', `datas${loginId}.json`)
-            this.sendFile(res, 'json', servPath, `assets/datas${loginId}.json`)
+            createFileIfNotExist(dbPath, `datas${loginId}.json`)
+            this.sendFile(res, 'json', serverPath, `assets/usersDB/datas${loginId}.json`)
           })
           .catch((error) => {
             console.error(error)
@@ -71,7 +64,7 @@ export default class Router {
           })
           req.on('end', () => {
             updateContent(
-              `${servPath}assets/datas${idLogin}.json`,
+              `${serverPath}assets/usersDB/datas${idLogin}.json`,
               concatedDatas.toString()
             )
           })
@@ -80,12 +73,7 @@ export default class Router {
     }
   }
 
-  sendFile(
-    res: ServerResponse,
-    extension: string,
-    path: string,
-    fileName: string
-  ) {
+  sendFile(res: ServerResponse, extension: string, path: string, fileName: string) {
     res.statusCode = 200
     res.setHeader('Content-Type', mimeType[extension])
     res.end(fs.readFileSync(path + fileName))
@@ -120,11 +108,7 @@ export default class Router {
       .request(opt, (response) => {
         response.on('data', (datas) => {
           datas = JSON.parse(datas.toString())
-          this.redirect(
-            res,
-            301,
-            `https://${host}/index.html?access-token=${datas.access_token}`
-          )
+          this.redirect(res, 301, `https://${host}/index.html?access-token=${datas.access_token}`)
         })
       })
       .end(body)

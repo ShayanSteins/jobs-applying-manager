@@ -52,7 +52,7 @@ Modifiez le fichier de configuration [config.json](/server/assets/config.json) s
 ```json
 {
   "basePath" : <chemin d'accès au dossier build de parcel>, 
-  "servPath" : <chemin d'accès au dossier server de l'appli>,
+  "serverPath" : <chemin d'accès au dossier server de l'appli>,
   "keyPath" : <chemin d'accès au fichier 'key.pem'>,
   "certPath" : <chemin d'accès au fichier 'cert.pem'>,
   "port" : <port d'écoute du serveur>,
