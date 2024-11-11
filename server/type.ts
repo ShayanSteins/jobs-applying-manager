@@ -1,27 +1,3 @@
-export type OpportunityHistory = {
-  date: string
-  modification: string
-}
+import crypto from 'crypto'
 
-export type EventDate = {
-  id: string,
-  type: string,
-  date: string,
-  retour: boolean
-}
-
-export type Opportunity = {
-  id: string
-  state: string
-  company: string
-  contact: string
-  location: string
-  technologies: string
-  url: string
-  notes: string
-  history: [OpportunityHistory]
-  closed: boolean
-  dates: [EventDate]
-}
-
-export type UUID = string;
+export type UUID = crypto.UUID;

@@ -1,8 +1,11 @@
-import https from 'https'
 import fs from 'fs'
-import { createFileIfNotExist, updateContent } from './datasManager'
-import { basePath, serverPath, dbPath, OAuthKeysPath } from './assets/config.json'
+import https from 'https'
 import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'http'
+import { GetUserOpportunitiesUseCase } from './opportunity/app/use-case/get-user-opportunities.use-case'
+import { basePath, serverPath, dbPath, OAuthKeysPath } from './assets/config.json'
+import { OpportunityRepository } from './opportunity/infra/opportunity.repository'
+import { JsonOpportunityDataSource } from './opportunity/infra/opportunity.data-source'
+import { UpdateUserOpportunityUseCase } from './opportunity/app/use-case/update-user-opportunity.use-case'
 const { clientId, clientSecret } = await import(OAuthKeysPath)
 
 const mimeType = {
@@ -15,7 +18,7 @@ const mimeType = {
 }
 
 export default class Router {
-  handle(req: IncomingMessage, res: ServerResponse) {
+  async handle(req: IncomingMessage, res: ServerResponse) {
     const url = new URL(req.url!, `https://${req.headers.host}`)
     const fileName = url.pathname
     const extension = fileName.split('.')[fileName.split('.').length - 1]
@@ -36,9 +39,15 @@ export default class Router {
       } else if (fileName === '/api/opportunities') {
         // Get user file data
         this.checkToken(req.headers)
-          .then((loginId) => {
-            createFileIfNotExist(dbPath, `datas${loginId}.json`)
-            this.sendFile(res, 'json', serverPath, `assets/usersDB/datas${loginId}.json`)
+          .then(async (loginId: number) => {
+            const opportunityRepository = new OpportunityRepository(
+              new JsonOpportunityDataSource(loginId)
+            )
+            const getUserOpportunitiesUseCase = new GetUserOpportunitiesUseCase(
+              opportunityRepository
+            )
+            const opportunities = await getUserOpportunitiesUseCase.execute(loginId)
+            this.sendData(res, 'json', opportunities)
           })
           .catch((error) => {
             console.error(error)
@@ -54,23 +63,51 @@ export default class Router {
         // Nominal case for html, js, css, images files
         this.sendFile(res, extension, basePath, fileName)
       }
-    } else {
-      if (fileName === '/api/update/pistes') {
-        // Update user file data
-        this.checkToken(req.headers).then((idLogin) => {
+    } else if (req.method === 'POST') {
+      if (fileName === '/api/update/opportunity') {
+        // Update opportunity
+        this.checkToken(req.headers).then((loginId: number) => {
           let concatedDatas = Buffer.alloc(0)
           req.on('data', (datas) => {
             concatedDatas = Buffer.concat([concatedDatas, datas])
           })
-          req.on('end', () => {
-            updateContent(
-              `${serverPath}assets/usersDB/datas${idLogin}.json`,
-              concatedDatas.toString()
+          req.on('end', async () => {
+            const opportunityRepository = new OpportunityRepository(
+              new JsonOpportunityDataSource(loginId)
             )
+            const updateUserOpportunityUseCase = new UpdateUserOpportunityUseCase(
+              opportunityRepository
+            )
+            const opportunity = await updateUserOpportunityUseCase.execute(loginId, concatedDatas)
+            this.sendData(res, 'json', opportunity)
           })
         })
+      } else if (fileName === '/api/update/pistes') {
+        // // Update user file data
+        // this.checkToken(req.headers).then((idLogin) => {
+        //   let concatedDatas = Buffer.alloc(0)
+        //   req.on('data', (datas) => {
+        //     concatedDatas = Buffer.concat([concatedDatas, datas])
+        //   })
+        //   req.on('end', () => {
+        //     updateContent(
+        //       `${serverPath}assets/usersDB/datas${idLogin}.json`,
+        //       concatedDatas.toString()
+        //     )
+        //   })
+        // })
       }
+    } else {
+      res.statusCode = 405
+      res.setHeader('Content-Type', 'text/html')
+      res.end(req.method + ' method is known by the server but is not supported by the target resource.')
     }
+  }
+
+  sendData(res: ServerResponse, extension: string, data: any) {
+    res.statusCode = 200
+    res.setHeader('Content-Type', mimeType[extension])
+    res.end(JSON.stringify(data))
   }
 
   sendFile(res: ServerResponse, extension: string, path: string, fileName: string) {
@@ -114,7 +151,7 @@ export default class Router {
       .end(body)
   }
 
-  checkToken(headers: IncomingHttpHeaders) {
+  checkToken(headers: IncomingHttpHeaders): Promise<number> {
     const opt = {
       port: 443,
       method: 'GET',

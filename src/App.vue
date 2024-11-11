@@ -4,32 +4,31 @@
       <span>Jobs Applying Manager</span>
     </header>
     <main>
-      <button @click="openPopin(false)">Nouveau</button>
-      <button class="deleteButton" @click="removePiste" :disabled="deleteButtonDisabled === 0">
-        Supprimer
+      <button @click="openPopin(false)">New</button>
+      <button class="deleteButton" @click="removeSelection" :disabled="deleteButtonDisabled === 0">
+        Remove
       </button>
       <transition name="fade">
-        <PopIn v-if="popInDisplayed" :isNewItem="isNewItem" :pisteToModify="pisteToModify" @close="closePopin"
-          @delete="removePiste" @check="checkedPiste" @save="savePiste" :listTechno="technologiesList"></PopIn>
+        <PopIn v-if="popInDisplayed" :isNewItem="isNewItem" :currentOpportunity="currentOpportunity" @close="closePopin"
+          @delete="removeSelection" @save="savePiste" :listTechno="technologiesList"></PopIn>
       </transition>
       <div class="boardContent">
         <table class="shadow">
           <thead>
             <th></th>
-            <th>Etat</th>
-            <th>Société</th>
-            <th>Localisation</th>
-            <th>Prochain rdv</th>
-            <th>Interlocuteur</th>
+            <th>State</th>
+            <th>Company</th>
+            <th>Location</th>
+            <th>Next step</th>
+            <th>Contact</th>
           </thead>
-          <tr v-if="!pistes.size">
+          <tr v-if="!opportunities.size">
             <td colspan="6">
-              Vous n'avez aucune piste pour le moment... Il est temps de
-              parcourir les sites d'annonces
+              You don't have any job opportunity yet...
             </td>
           </tr>
-          <PisteLine v-for="[id, piste] in pistes" :key="id" :piste="piste" @open-popin="openPopin"
-            @check="checkedPiste"></PisteLine>
+          <PisteLine v-for="[id, opportunity] in opportunities" :key="id" :opportunity="opportunity"
+            @open-popin="openPopin" @check="selectOpportunity"></PisteLine>
         </table>
         <div class="notif">Notifications</div>
       </div>
@@ -45,17 +44,17 @@ import { computed, ref, onBeforeMount } from 'vue';
 
 const popInDisplayed = ref(false)
 const isNewItem = ref(true)
-const pisteToModify = ref(undefined)
+const currentOpportunity = ref(undefined)
 const idsToDelete = ref(new Set())
-const pistes = ref(new Map())
+const opportunities = ref(new Map())
 const deleteButtonDisabled = ref(0)
 const token = ref(null)
 
 const technologiesList = computed(() => {
   const list = new Set()
-  for (const [key, val] of pistes.value) {
-    for (const techno of val.technos.split(', ')) {
-      list.add(techno)
+  for (const [key, val] of opportunities.value) {
+    for (const technology of val.technologies.split(', ')) {
+      list.add(technology)
     }
   }
   return list
@@ -76,11 +75,10 @@ function getAllPistes() {
       return response.json()
     })
     .then((datas) => {
-      pistes.value = new Map()
+      opportunities.value = new Map()
       for (const item of datas) {
-        pistes.value.set(item.id, item)
+        opportunities.value.set(item.uuid, item)
       }
-      calculateState()
     })
     .catch((err) => {
       throw err
@@ -90,38 +88,49 @@ function getAllPistes() {
 function openPopin(isFromPisteTable, piste) {
   isNewItem.value = !isFromPisteTable
   if (isFromPisteTable) {
-    pisteToModify.value = deepCopy(piste)
+    currentOpportunity.value = deepCopy(piste)
   }
   popInDisplayed.value = true
 }
 
 function closePopin() {
-  pisteToModify.value = undefined
+  currentOpportunity.value = undefined
   popInDisplayed.value = false
 }
 
-function savePiste(pisteFromPopin) {
-  // Ajout - MAJ d'une piste dans la liste
-  if (!pisteFromPopin.hasOwnProperty('id')) {
-    return
+async function savePiste(opportunityFromPopin) {
+  const opportunity = JSON.stringify(opportunityFromPopin)
+  const optReq = {
+    method: 'POST',
+    headers: new Headers({
+      'access-token': token.value,
+      'Content-Type': 'application/json',
+      'Content-Length': opportunity.length
+    }),
+    body: opportunity
   }
-  pistes.value.set(pisteFromPopin.id, pisteFromPopin)
-  calculateState()
+  fetch('/api/update/opportunity', optReq)
+    .then((response) => {
+      return response.json()
+    })
+    .then((datas) => {
+      opportunities.value.set(datas.uuid, datas)
+    })
+    .catch((err) => console.log(err))
+
   closePopin()
-  saveAllPistes()
 }
 
-function checkedPiste(data) {
-  // Gestion des checkbox du tableau
-  const [id, bool] = data
-  if (bool)
+function selectOpportunity(data) {
+  const [id, isChecked] = data
+  if (isChecked)
     idsToDelete.value.add(id)
   else
     idsToDelete.value.delete(id)
   deleteButtonDisabled.value = idsToDelete.value.size
 }
 
-function removePiste(p) {
+function removeSelection(p) {
   let oldSet = new Set()
 
   // Supression via la popin
@@ -130,7 +139,7 @@ function removePiste(p) {
       oldSet = idsToDelete.value
     idsToDelete.value = new Set([p.id])
   }
-  idsToDelete.value.forEach(id => pistes.value.delete(id))
+  idsToDelete.value.forEach(id => opportunities.value.delete(id))
 
   idsToDelete.value = oldSet
   closePopin()
@@ -139,7 +148,7 @@ function removePiste(p) {
 }
 
 function saveAllPistes() {
-  const datas = JSON.stringify(mapToArray(pistes.value, true))
+  const datas = JSON.stringify(mapToArray(opportunities.value, true))
   const optReq = {
     method: 'POST',
     headers: new Headers({
@@ -153,25 +162,25 @@ function saveAllPistes() {
     .catch((err) => console.log(err))
 }
 
-function calculateState() {
-  // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
-  for (let [id, piste] of pistes.value) {
-    if (piste.closed) {
-      piste.etat = 'Fermée'
-    }
-    else if (undefined !== piste.dates && piste.dates.length > 0) {
-      // récupère la dernière date insérée
-      let lastDate = piste.dates[piste.dates.length - 1]
-      // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : Etat = Postulée
-      if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) piste.etat = 'Postulée'
-      // Si la date d'entretient n'est pas encore passée
-      else if (new Date(lastDate.date) > new Date()) piste.etat = 'En attente d\'entretient'
-      // Si la date d'entretient est passée et que l'on n'a pas eu de retour
-      else if (new Date(lastDate.date) < new Date() && !lastDate.retour) piste.etat = 'En attente de retour'
-      else piste.etat = 'Terminée'
-    }
-  }
-}
+// function calculateState() {
+//   // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
+//   for (let [id, piste] of pistes.value) {
+//     if (piste.closed) {
+//       piste.state = 'Fermée'
+//     }
+//     else if (undefined !== piste.dates && piste.dates.length > 0) {
+//       // récupère la dernière date insérée
+//       let lastDate = piste.dates[piste.dates.length - 1]
+//       // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : State = Postulée
+//       if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) piste.state = 'Postulée'
+//       // Si la date d'entretient n'est pas encore passée
+//       else if (new Date(lastDate.date) > new Date()) piste.state = 'En attente d\'entretient'
+//       // Si la date d'entretient est passée et que l'on n'a pas eu de retour
+//       else if (new Date(lastDate.date) < new Date() && !lastDate.answer) piste.state = 'En attente de retour'
+//       else piste.state = 'Terminée'
+//     }
+//   }
+// }
 
 function mapToArray(obj, arrayWanted) {
   let newObj

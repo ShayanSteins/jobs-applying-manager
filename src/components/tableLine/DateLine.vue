@@ -3,19 +3,23 @@
     <td>{{ dateLine.type }}</td>
     <td>{{ formatedDate }}</td>
     <td>
-      <CheckboxInput labelName="" v-model="dateLine.retour"></CheckboxInput>
+      <CheckboxInput labelName="" v-model:checked="dateLine.answer" ></CheckboxInput>
     </td>
     <td>
-      <button @click="$emit('remove', dateLine.id)" title="Supprimer">-</button>
+      <button @click="$emit('remove', dateLine.id)" title="Remove">-</button>
     </td>
   </tr>
 </template>
 
 <script setup>
 import CheckboxInput from '../formComponents/CheckboxInput.vue'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+
+defineEmits(['remove'])
 
 const props = defineProps({ 'dateLine': Object })
+
+// const answered = ref(props.dateLine.answer)
 
 const formatedDate = computed(() => {
   return new Date(props.dateLine.date).toLocaleString()

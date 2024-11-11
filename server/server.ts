@@ -30,6 +30,7 @@ export default class Server {
   start(): void {
     this.server.listen(port, () => {
       console.log(`Server running at port ${port}`)
+      console.log(`https://localhost:${port}`)
     })
   }
 }

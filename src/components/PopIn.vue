@@ -1,39 +1,39 @@
 <template>
   <div class="shadowBox" name="shadowBox" @click="(e) => { if (e.target.classList[0] === 'shadowBox') $emit('close') }">
-    <div class="popin shadow" :id="piste.id">
-      <h1 v-if="isNewItem">Création de la piste</h1>
-      <h1 v-else>Détails de la piste</h1>
+    <div class="popin shadow" :id="opportunity.id">
+      <h1 v-if="isNewItem">New opportunity</h1>
+      <h1 v-else>Opportunity details</h1>
       <form @submit="checkForm">
         <div class="wholePiste">
           <div class="left">
-            <TextInput inputType="text" labelName="Société" v-model="piste.societe" isRequired></TextInput>
-            <AvailableOptionsInput labelName="Technologies" v-model="piste.technos" :dataList="listTechno">
+            <TextInput inputType="text" labelName="Company" v-model="opportunity.company" isRequired></TextInput>
+            <AvailableOptionsInput labelName="Technologies" v-model="opportunity.technologies" :dataList="listTechno">
             </AvailableOptionsInput>
-            <TextInput inputType="url" labelName="Liens" v-model="piste.liens"></TextInput>
-            <DatesManager :value="piste.dates" @change="updateDatesList"></DatesManager>
+            <TextInput inputType="url" labelName="Url" v-model="opportunity.url"></TextInput>
+            <DatesManager :value="opportunity.dates" @change="updateDatesList"></DatesManager>
           </div>
           <div class="right">
-            <TextInput inputType="text" labelName="Etat" isDisabled v-model="piste.etat"></TextInput>
-            <TextInput inputType="text" labelName="Interlocuteur" v-model="piste.interlocuteur"></TextInput>
-            <TextInput inputType="text" labelName="Localisation" v-model="piste.localisation"></TextInput>
-            <CheckboxInput v-if="!isNewItem" labelName="Fermée" v-model:checked="piste.closed"></CheckboxInput>
+            <TextInput inputType="text" labelName="State" isDisabled v-model="opportunity.state"></TextInput>
+            <TextInput inputType="text" labelName="Contact" v-model="opportunity.contact"></TextInput>
+            <TextInput inputType="text" labelName="Location" v-model="opportunity.location"></TextInput>
+            <CheckboxInput v-if="!isNewItem" labelName="Closed" v-model:checked="opportunity.closed"></CheckboxInput>
           </div>
         </div>
         <div class="middle">
-          <TextInput inputType="textarea" labelName="Notes" v-model="piste.notes"></TextInput>
+          <TextInput inputType="textarea" labelName="Notes" v-model="opportunity.notes"></TextInput>
         </div>
-        <div class="histContainer" v-if="piste.historique">
-          <h2>Historique</h2>
+        <div class="histContainer" v-if="opportunity.history">
+          <h2>History</h2>
           <div class="histSubContainer">
-            <HistoriqueLine v-for="histo in piste.historique" :key="histo.date.toString()" :histo="histo">
-            </HistoriqueLine>
+            <HistoryLine v-for="historyEntry in opportunity.history" :key="historyEntry.date.toString()" :historyEntry="historyEntry">
+            </HistoryLine>
           </div>
         </div>
         <div class="buttonContainer">
-          <button v-if="!isNewItem" @click="$emit('delete', piste)" class="deleteButton">Supprimer</button>
-          <button v-if="isNewItem" type="submit">Enregistrer</button>
-          <button v-else type="submit">Mettre à jour</button>
-          <button @click="$emit('close')">Annuler</button>
+          <button v-if="!isNewItem" @click="$emit('delete', opportunity)" class="deleteButton">Remove</button>
+          <button v-if="isNewItem" type="submit">Save</button>
+          <button v-else type="submit">Update</button>
+          <button @click="$emit('close')">Cancel</button>
         </div>
       </form>
     </div>
@@ -45,9 +45,9 @@ import DatesManager from './DatesManager.vue'
 import TextInput from './formComponents/TextInput.vue'
 import AvailableOptionsInput from './formComponents/AvailableOptionsInput.vue'
 import CheckboxInput from './formComponents/CheckboxInput.vue'
-import HistoriqueLine from './tableLine/HistoriqueLine.vue'
-import { createUUID, deepComparison } from "../common.js"
-import { ref, onMounted } from 'vue';
+import HistoryLine from './tableLine/HistoryLine.vue'
+import { createUUID, deepComparison, deepCopy } from "../common.js"
+import { ref, onMounted, toValue, toRaw } from 'vue';
 
 const props = defineProps({
   isNewItem: {
@@ -56,19 +56,19 @@ const props = defineProps({
   listTechno: {
     type: Set
   },
-  pisteToModify: {
+  currentOpportunity: {
     type: Object,
     default: () => {
       return {
         id: createUUID(),
-        etat: "Nouvelle",
-        societe: "",
-        interlocuteur: "",
-        localisation: "",
-        technos: "",
-        liens: "",
+        state: "New",
+        company: "",
+        contact: "",
+        location: "",
+        technologies: "",
+        url: "",
         notes: "",
-        historique: null,
+        history: null,
         closed: false,
         dates: []
       }
@@ -76,12 +76,14 @@ const props = defineProps({
   }
 })
 
-const piste = ref(props.pisteToModify)
 
-const emit = defineEmits(['save', 'close', 'delete', 'check'])
+const opportunity = ref(props.currentOpportunity)
+const opportunityBeforeModification = deepCopy(opportunity.value)
+
+const emit = defineEmits(['save', 'close', 'delete'])
 
 onMounted(() => {
-  // Stop le fire d'un des boutons du formulaire lors de l'appui sur la touche ENTREE dans un input
+  // Prevent any submit action while pressing ENTER
   document.querySelectorAll('.popin input').forEach(input => {
     input.addEventListener('keypress', e => {
       if (e.keyCode === 13) e.preventDefault()
@@ -90,33 +92,30 @@ onMounted(() => {
 })
 
 function updateDatesList(newDates) {
-  piste.value.dates = newDates
+  opportunity.value.dates = newDates
 }
 function checkForm(e) {
-  // Vérification du formulaire et mise à jour de l'historique avant sauvegarde
   e.preventDefault();
 
-  // Gestion de l'historique 
+  // History management 
   if (props.isNewItem) {
-    piste.value.historique = [{
+    opportunity.value.history = [{
       date: new Date().toISOString().split('T')[0] + 'T' + new Date().toLocaleTimeString(),
-      modif: "Création de la piste."
+      modification: "Opportunity creation."
     }]
   }
   else {
-    const modifs = deepComparison(piste.value, props.pisteToModify)
-    let singPluriel = "du champ"
+    const differences = deepComparison(opportunity.value, opportunityBeforeModification)
 
-    if (modifs.length > 0) {
-      if (modifs.length > 1) singPluriel = "des champs"
-      piste.value.historique.push({
+    if (differences.length > 0) {
+      opportunity.value.history.push({
         date: new Date().toISOString().split('T')[0] + 'T' + new Date().toLocaleTimeString(),
-        modif: `Modification ${singPluriel} : ${modifs}`
+        modification: `Opportunity updated : ${differences}`
       })
     }
   }
 
-  emit('save', piste.value)
+  emit('save', opportunity.value)
 }
 </script>
 
