@@ -4,9 +4,9 @@ import { Opportunity } from '../domain/opportunity.entity'
 import { OpportunitiesDataSource } from './opportunity.data-source'
 
 export interface OpportunityRepositoryInterface {
-  persist(userId: number, opportunity: Buffer): Promise<Opportunity>
-  getAllByUser(userId: number): Promise<Opportunity[] | null>
-  findById(uuid: UUID): Promise<Opportunity | null>
+  getAllByUser(): Promise<Opportunity[]>
+  persist(opportunity: Buffer): Promise<Opportunity>
+  delete(uuids: UUID[]): Promise<Opportunity[]>
 }
 
 export class OpportunityRepository implements OpportunityRepositoryInterface {
@@ -16,17 +16,18 @@ export class OpportunityRepository implements OpportunityRepositoryInterface {
     this.opportunitiesDataSource = opportunitiesDataSource
   }
 
-  async persist(userId: number, opportunity: Buffer): Promise<Opportunity> {   
+  async getAllByUser(): Promise<Opportunity[]> {
+    return this.opportunitiesDataSource.getAll()
+  }
+
+  async persist(opportunity: Buffer): Promise<Opportunity> {
     const jsonOpportunity = mapTo(opportunity)[0]
-    await this.opportunitiesDataSource.persist(userId, jsonOpportunity)
+    await this.opportunitiesDataSource.persist(jsonOpportunity)
     return jsonOpportunity
   }
 
-  async getAllByUser(userId: number): Promise<Opportunity[] | null> {
-    return this.opportunitiesDataSource.getAll(userId)
-  }
-  
-  async findById(uuid: UUID): Promise<Opportunity | null> {
-    throw new Error('Method not implemented.')
+  async delete(uuids: UUID[]): Promise<Opportunity[]> {
+    const opportunities = await this.opportunitiesDataSource.delete(uuids)
+    return opportunities
   }
 }

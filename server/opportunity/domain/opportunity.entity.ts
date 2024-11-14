@@ -20,7 +20,7 @@ export class Opportunity extends Entity<OpportunityType> {
   private notes: string
   private history: OpportunityHistory[]
   private closed: boolean
-  private dates: EventDate[] | null
+  private dates: EventDate[]
 
   static create(payload: CreatePayload) {
     if (!payload.company) throw new Error('Missing company')
@@ -30,7 +30,7 @@ export class Opportunity extends Entity<OpportunityType> {
       history: [
         {
           date: new Date().toISOString().split('T')[0] + 'T' + new Date().toLocaleTimeString(),
-          modification: 'Création de la piste.',
+          modification: 'Opportunity creation.',
         },
       ],
       ...payload,

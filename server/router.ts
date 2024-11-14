@@ -1,11 +1,13 @@
 import fs from 'fs'
 import https from 'https'
 import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'http'
-import { GetUserOpportunitiesUseCase } from './opportunity/app/use-case/get-user-opportunities.use-case'
-import { basePath, serverPath, dbPath, OAuthKeysPath } from './assets/config.json'
+import { basePath, OAuthKeysPath } from './assets/config.json'
 import { OpportunityRepository } from './opportunity/infra/opportunity.repository'
 import { JsonOpportunityDataSource } from './opportunity/infra/opportunity.data-source'
+import { GetUserOpportunitiesUseCase } from './opportunity/app/use-case/get-user-opportunities.use-case'
 import { UpdateUserOpportunityUseCase } from './opportunity/app/use-case/update-user-opportunity.use-case'
+import { DeleteUserOpportunityUseCase } from './opportunity/app/use-case/delete-user-opportunity.use-case'
+import { UUID } from './type'
 const { clientId, clientSecret } = await import(OAuthKeysPath)
 
 const mimeType = {
@@ -19,11 +21,12 @@ const mimeType = {
 
 export default class Router {
   async handle(req: IncomingMessage, res: ServerResponse) {
-    const url = new URL(req.url!, `https://${req.headers.host}`)
-    const fileName = url.pathname
-    const extension = fileName.split('.')[fileName.split('.').length - 1]
+    try {
+      this.isMethodSupported(req.method!, res)
+      const url = new URL(req.url!, `https://${req.headers.host}`)
+      const fileName = url.pathname
+      const extension = fileName.split('.')[fileName.split('.').length - 1]
 
-    if (req.method === 'GET') {
       if (fileName === '/') {
         // Redirect to github Auth if user is not logged in yet
         this.redirect(res, 301, `https://github.com/login/oauth/authorize?client_id=${clientId}`)
@@ -33,74 +36,59 @@ export default class Router {
         if (code) {
           this.authentication(code, res, req.headers.host!)
         } else {
-          res.statusCode = 403
-          res.end('403 - Access denied')
+          this.sendError(res, 403, '403 - Access denied')
         }
-      } else if (fileName === '/api/opportunities') {
-        // Get user file data
-        this.checkToken(req.headers)
-          .then(async (loginId: number) => {
-            const opportunityRepository = new OpportunityRepository(
-              new JsonOpportunityDataSource(loginId)
-            )
-            const getUserOpportunitiesUseCase = new GetUserOpportunitiesUseCase(
-              opportunityRepository
-            )
-            const opportunities = await getUserOpportunitiesUseCase.execute(loginId)
-            this.sendData(res, 'json', opportunities)
-          })
-          .catch((error) => {
-            console.error(error)
-            res.statusCode = 403
-            res.end('403 - Access denied')
-          })
-      } else if (!fs.existsSync(basePath + fileName)) {
-        // 404 ERROR
-        res.statusCode = 404
-        res.setHeader('Content-Type', 'text/html')
-        res.end('404 - File not found... (T-T)')
-      } else {
-        // Nominal case for html, js, css, images files
-        this.sendFile(res, extension, basePath, fileName)
-      }
-    } else if (req.method === 'POST') {
-      if (fileName === '/api/update/opportunity') {
-        // Update opportunity
-        this.checkToken(req.headers).then((loginId: number) => {
+      } else if (fileName.match(/^(\/api\/opportunity)/) !== null) {
+        const userId = await this.checkToken(req.headers)
+        const opportunityRepository = new OpportunityRepository(
+          new JsonOpportunityDataSource(userId)
+        )
+
+        if (fileName === '/api/opportunity/all') {
+          // Get user file data
+          const getUserOpportunitiesUseCase = new GetUserOpportunitiesUseCase(opportunityRepository)
+          const opportunities = await getUserOpportunitiesUseCase.execute()
+          this.sendData(res, 'json', opportunities)
+        } else if (fileName === '/api/opportunity/update') {
           let concatedDatas = Buffer.alloc(0)
           req.on('data', (datas) => {
             concatedDatas = Buffer.concat([concatedDatas, datas])
           })
           req.on('end', async () => {
-            const opportunityRepository = new OpportunityRepository(
-              new JsonOpportunityDataSource(loginId)
-            )
             const updateUserOpportunityUseCase = new UpdateUserOpportunityUseCase(
               opportunityRepository
             )
-            const opportunity = await updateUserOpportunityUseCase.execute(loginId, concatedDatas)
+            const opportunity = await updateUserOpportunityUseCase.execute({
+              opportunity: concatedDatas,
+            })
             this.sendData(res, 'json', opportunity)
           })
-        })
-      } else if (fileName === '/api/update/pistes') {
-        // // Update user file data
-        // this.checkToken(req.headers).then((idLogin) => {
-        //   let concatedDatas = Buffer.alloc(0)
-        //   req.on('data', (datas) => {
-        //     concatedDatas = Buffer.concat([concatedDatas, datas])
-        //   })
-        //   req.on('end', () => {
-        //     updateContent(
-        //       `${serverPath}assets/usersDB/datas${idLogin}.json`,
-        //       concatedDatas.toString()
-        //     )
-        //   })
-        // })
+        } else if (fileName === '/api/opportunity/delete') {
+          let concatedDatas = Buffer.alloc(0)
+          req.on('data', (datas) => {
+            concatedDatas = Buffer.concat([concatedDatas, datas])
+          })
+          req.on('end', async () => {
+            const deleteUserOpportunityUseCase = new DeleteUserOpportunityUseCase(
+              opportunityRepository
+            )
+            const uuids: UUID[] = JSON.parse(concatedDatas.toString())
+            const opportunity = await deleteUserOpportunityUseCase.execute({
+              uuids,
+            })
+            this.sendData(res, 'json', opportunity)
+          })
+        }
+      } else if (!fs.existsSync(basePath + fileName)) {
+        // 404 ERROR
+        this.sendError(res, 404, '404 - File not found... (T-T)')
+      } else {
+        // Nominal case for html, js, css, images files
+        this.sendFile(res, extension, basePath, fileName)
       }
-    } else {
-      res.statusCode = 405
-      res.setHeader('Content-Type', 'text/html')
-      res.end(req.method + ' method is known by the server but is not supported by the target resource.')
+    } catch (error) {
+      console.error(error)
+      this.sendError(res, res.statusCode, error)
     }
   }
 
@@ -116,11 +104,29 @@ export default class Router {
     res.end(fs.readFileSync(path + fileName))
   }
 
+  sendError(res: ServerResponse, statusCode: number, data: string) {
+    res.statusCode = statusCode
+    res.setHeader('Content-Type', 'text/html')
+    res.end(data)
+  }  
+
   redirect(res: ServerResponse, statusCode: number, location: string) {
     res.writeHead(statusCode, {
       Location: location,
     })
     res.end()
+  }
+
+  isMethodSupported(method: string, res: ServerResponse): void {
+    const supportedMethods = ['POST', 'DELETE', 'GET']
+
+    if (!supportedMethods.includes(method)) {
+      this.sendError(
+        res,
+        405,
+        method + ' method is known by the server but is not supported by the target resource.'
+      )
+    }
   }
 
   authentication(code: string, res: ServerResponse, host: string) {

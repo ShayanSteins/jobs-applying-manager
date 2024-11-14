@@ -2,7 +2,7 @@
   <tr @click="(e) => { if (e.target.type !== 'checkbox') $emit('open-popin', true, opportunity) }"
     :class="{ closed: opportunity.closed }">
     <td>
-      <CheckBoxInput labelName v-model="dataChecked" @change="$emit('check', [opportunity.id, $event])" />
+      <CheckBoxInput labelName="" v-model:checked="opportunity.isSelected" />
     </td>
     <td>{{ opportunity.state }}</td>
     <td>{{ opportunity.company }}</td>
@@ -19,14 +19,10 @@ import { computed, ref } from 'vue'
 const props = defineProps({
   opportunity: {
     type: Object
-  },
-  checked: {
-    type: Boolean,
-    default: false
   }
 })
 
-const dataChecked = ref(props.checked)
+const currentOpportunity = ref(props.opportunity)
 
 defineEmits(['open-popin', 'check'])
 

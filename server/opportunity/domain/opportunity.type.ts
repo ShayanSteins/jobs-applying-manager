@@ -11,7 +11,7 @@ export interface OpportunityType {
   notes: string
   history: OpportunityHistory[]
   closed: boolean
-  dates: EventDate[] | []
+  dates: EventDate[]
 }
 
 export type OpportunityHistory = {

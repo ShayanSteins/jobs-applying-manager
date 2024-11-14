@@ -25,7 +25,8 @@
         <div class="histContainer" v-if="opportunity.history">
           <h2>History</h2>
           <div class="histSubContainer">
-            <HistoryLine v-for="historyEntry in opportunity.history" :key="historyEntry.date.toString()" :historyEntry="historyEntry">
+            <HistoryLine v-for="historyEntry in opportunity.history" :key="historyEntry.date.toString()"
+              :historyEntry="historyEntry">
             </HistoryLine>
           </div>
         </div>
@@ -103,6 +104,7 @@ function checkForm(e) {
       date: new Date().toISOString().split('T')[0] + 'T' + new Date().toLocaleTimeString(),
       modification: "Opportunity creation."
     }]
+    emit('save', opportunity.value)
   }
   else {
     const differences = deepComparison(opportunity.value, opportunityBeforeModification)
@@ -112,10 +114,10 @@ function checkForm(e) {
         date: new Date().toISOString().split('T')[0] + 'T' + new Date().toLocaleTimeString(),
         modification: `Opportunity updated : ${differences}`
       })
+      emit('save', opportunity.value)
     }
   }
-
-  emit('save', opportunity.value)
+  emit('close')
 }
 </script>
 

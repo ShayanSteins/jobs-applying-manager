@@ -21,9 +21,8 @@ const props = defineProps({
   })
 
 const inputName = ref(props.labelName.normalize('NFD').replace(/[\u0300-\u036f]/g, ""))
-// const dataChecked = ref(props.checked)
 
-const emit = defineEmits(['update:checked'])
+const emit = defineEmits(['change', 'update:model-value', 'update:checked'])
 
 </script>
 

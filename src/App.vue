@@ -5,7 +5,7 @@
     </header>
     <main>
       <button @click="openPopin(false)">New</button>
-      <button class="deleteButton" @click="removeSelection" :disabled="deleteButtonDisabled === 0">
+      <button class="deleteButton" @click="removeSelection" :disabled="deleteButtonDisabled">
         Remove
       </button>
       <transition name="fade">
@@ -28,7 +28,7 @@
             </td>
           </tr>
           <PisteLine v-for="[id, opportunity] in opportunities" :key="id" :opportunity="opportunity"
-            @open-popin="openPopin" @check="selectOpportunity"></PisteLine>
+            @open-popin="openPopin"></PisteLine>
         </table>
         <div class="notif">Notifications</div>
       </div>
@@ -40,15 +40,22 @@
 import PopIn from './components/PopIn.vue'
 import PisteLine from './components/tableLine/PisteLine.vue'
 import { deepCopy } from './common.js'
-import { computed, ref, onBeforeMount } from 'vue';
+import { computed, ref, onBeforeMount, watchEffect } from 'vue';
 
 const popInDisplayed = ref(false)
 const isNewItem = ref(true)
 const currentOpportunity = ref(undefined)
 const idsToDelete = ref(new Set())
 const opportunities = ref(new Map())
-const deleteButtonDisabled = ref(0)
 const token = ref(null)
+
+watchEffect(async () => {
+  const list = new Set()
+  for (const [key, val] of opportunities.value) {
+    if (val.isSelected) list.add(key)
+  }
+  idsToDelete.value = list
+})
 
 const technologiesList = computed(() => {
   const list = new Set()
@@ -60,6 +67,8 @@ const technologiesList = computed(() => {
   return list
 })
 
+const deleteButtonDisabled = computed(() => idsToDelete.value.size === 0)
+
 onBeforeMount(() => {
   getAllPistes()
 })
@@ -70,14 +79,14 @@ function getAllPistes() {
     method: 'GET',
     headers: new Headers({ 'access-token': token.value })
   }
-  fetch('/api/opportunities', optReq)
+  fetch('/api/opportunity/all', optReq)
     .then((response) => {
       return response.json()
     })
     .then((datas) => {
       opportunities.value = new Map()
       for (const item of datas) {
-        opportunities.value.set(item.uuid, item)
+        opportunities.value.set(item.uuid, { ...item, isSelected: false })
       }
     })
     .catch((err) => {
@@ -109,42 +118,54 @@ async function savePiste(opportunityFromPopin) {
     }),
     body: opportunity
   }
-  fetch('/api/update/opportunity', optReq)
+  fetch('/api/opportunity/update', optReq)
     .then((response) => {
       return response.json()
     })
     .then((datas) => {
-      opportunities.value.set(datas.uuid, datas)
+      opportunities.value.set(datas.uuid, { ...datas, isSelected: false })
     })
     .catch((err) => console.log(err))
 
   closePopin()
 }
 
-function selectOpportunity(data) {
-  const [id, isChecked] = data
-  if (isChecked)
-    idsToDelete.value.add(id)
-  else
-    idsToDelete.value.delete(id)
-  deleteButtonDisabled.value = idsToDelete.value.size
-}
-
-function removeSelection(p) {
+function removeSelection(eventFromPopup) {
   let oldSet = new Set()
 
-  // Supression via la popin
-  if (p !== undefined && !(p instanceof MouseEvent)) {
-    if (idsToDelete.value.size > 0) // on conserve la sélection du tableau du main
+  if (eventFromPopup !== undefined && !(eventFromPopup instanceof MouseEvent)) {
+    if (idsToDelete.value.size > 0)
       oldSet = idsToDelete.value
-    idsToDelete.value = new Set([p.id])
+    idsToDelete.value = new Set([eventFromPopup.id])
   }
-  idsToDelete.value.forEach(id => opportunities.value.delete(id))
+
+  let ids = []
+  idsToDelete.value.forEach(id => ids.push(id))
+  ids = JSON.stringify(ids)
+
+  const optReq = {
+    method: 'DELETE',
+    headers: new Headers({
+      'access-token': token.value,
+      'Content-Type': 'application/json',
+      'Content-Length': ids.length
+    }),
+    body: ids
+  }
+  fetch('/api/opportunity/delete', optReq)
+    .then((response) => {
+      return response.json()
+    })
+    .then((datas) => {
+      opportunities.value.clear()
+      for (const item of datas) {
+        opportunities.value.set(item.uuid, { ...item, isSelected: false })
+      }
+    })
+    .catch((err) => console.log(err))
 
   idsToDelete.value = oldSet
   closePopin()
-  saveAllPistes()
-  deleteButtonDisabled.value = idsToDelete.value.size
 }
 
 function saveAllPistes() {
@@ -161,26 +182,6 @@ function saveAllPistes() {
   fetch('/api/update/pistes', optReq)
     .catch((err) => console.log(err))
 }
-
-// function calculateState() {
-//   // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
-//   for (let [id, piste] of pistes.value) {
-//     if (piste.closed) {
-//       piste.state = 'Fermée'
-//     }
-//     else if (undefined !== piste.dates && piste.dates.length > 0) {
-//       // récupère la dernière date insérée
-//       let lastDate = piste.dates[piste.dates.length - 1]
-//       // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : State = Postulée
-//       if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) piste.state = 'Postulée'
-//       // Si la date d'entretient n'est pas encore passée
-//       else if (new Date(lastDate.date) > new Date()) piste.state = 'En attente d\'entretient'
-//       // Si la date d'entretient est passée et que l'on n'a pas eu de retour
-//       else if (new Date(lastDate.date) < new Date() && !lastDate.answer) piste.state = 'En attente de retour'
-//       else piste.state = 'Terminée'
-//     }
-//   }
-// }
 
 function mapToArray(obj, arrayWanted) {
   let newObj
