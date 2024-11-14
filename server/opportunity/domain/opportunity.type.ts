@@ -1,4 +1,6 @@
-import { UUID } from '../../type'
+import crypto from 'crypto'
+
+export type UUID = crypto.UUID;
 
 export interface OpportunityType {
   uuid: UUID

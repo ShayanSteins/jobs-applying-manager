@@ -1,12 +1,11 @@
 import fs from 'node:fs'
-import { UUID } from '../../type'
-import { Opportunity } from '../domain/opportunity.entity'
 import { dbPath } from '../../assets/config.json'
+import { OpportunityType, UUID } from '../domain/opportunity.type'
 
 export interface OpportunitiesDataSource {
-  getAll(): Promise<Opportunity[]>
-  persist(opportunity: Opportunity): void
-  delete(uuids: UUID[]): Promise<Opportunity[]>
+  getAll(): Promise<OpportunityType[]>
+  persist(opportunity: OpportunityType): void
+  delete(uuids: UUID[]): Promise<OpportunityType[]>
 }
 
 export class JsonOpportunityDataSource implements OpportunitiesDataSource {
@@ -18,33 +17,18 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
     console.log('Connected to DB')
   }
 
-  getAll(): Promise<Opportunity[]> {
-    let datas
+  async getAll(): Promise<OpportunityType[]> {
     try {
-      datas = JSON.parse(fs.readFileSync(dbPath + `datas${this.primaryId}.json`, 'utf8'))
-      return datas.map((item) => ({
-        uuid: item.uuid,
-        state: item.state,
-        company: item.company,
-        contact: item.contact,
-        location: item.location,
-        technologies: item.technologies,
-        url: item.url,
-        notes: item.notes,
-        history: item.history,
-        closed: item.closed,
-        dates: item.dates,
-      }))
+      return this.getData()
     } catch (error) {
       console.error(error)
       throw error
     }
   }
 
-  persist(opportunity: Opportunity): void {
+  async persist(opportunity: OpportunityType): Promise<void> {
     try {
-      const bufferedDatas = fs.readFileSync(dbPath + `datas${this.primaryId}.json`, 'utf8')
-      let content = JSON.parse(bufferedDatas.toString())
+      let content = await this.getData()
       let existingOpportunity = content.findIndex(
         (olOpportunity) => olOpportunity.uuid === opportunity.uuid
       )
@@ -55,7 +39,7 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
         content[existingOpportunity] = opportunity
       }
 
-      fs.writeFileSync(dbPath + `datas${this.primaryId}.json`, JSON.stringify(content))
+      await this.putData(content)
       console.log('File has been saved')
     } catch (error) {
       console.error(error)
@@ -63,26 +47,11 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
     }
   }
 
-  delete(uuids: UUID[]): Promise<Opportunity[]> {
-    let allOpportunities
+  async delete(uuids: UUID[]): Promise<OpportunityType[]> {
     try {
-      allOpportunities = JSON.parse(fs.readFileSync(dbPath + `datas${this.primaryId}.json`, 'utf8'))
+      const allOpportunities = await this.getData()
 
-      let mapped = allOpportunities.map((item) => ({
-        uuid: item.uuid,
-        state: item.state,
-        company: item.company,
-        contact: item.contact,
-        location: item.location,
-        technologies: item.technologies,
-        url: item.url,
-        notes: item.notes,
-        history: item.history,
-        closed: item.closed,
-        dates: item.dates,
-      }))
-
-      mapped.filter((opportunity, index, array) => {
+      allOpportunities.filter((opportunity, index, array) => {
         if (uuids.includes(opportunity.uuid)) {
           array.splice(index, 1)
           return true
@@ -90,9 +59,9 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
         return false
       })
 
-      fs.writeFileSync(dbPath + `datas${this.primaryId}.json`, JSON.stringify(mapped))
+      await this.putData(allOpportunities)
+      return allOpportunities
 
-      return mapped
     } catch (error) {
       console.error(error)
       throw error
@@ -103,5 +72,26 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
     if (!fs.existsSync(path + fileName)) {
       fs.copyFileSync(path + 'modelDatas.json', path + fileName)
     }
+  }
+
+  private async getData(): Promise<OpportunityType[]> {
+    const jsonData = JSON.parse(fs.readFileSync(dbPath + `datas${this.primaryId}.json`, 'utf8'))
+    return jsonData.map((item: OpportunityType) => ({
+      uuid: item.uuid,
+      state: item.state,
+      company: item.company,
+      contact: item.contact,
+      location: item.location,
+      technologies: item.technologies,
+      url: item.url,
+      notes: item.notes,
+      history: item.history,
+      closed: item.closed,
+      dates: item.dates,
+    }))
+  }
+
+  private async putData(dataToWrite: OpportunityType[]): Promise<void> {
+    fs.writeFileSync(dbPath + `datas${this.primaryId}.json`, JSON.stringify(dataToWrite))
   }
 }

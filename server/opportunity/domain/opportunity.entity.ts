@@ -1,5 +1,4 @@
 import { Entity } from '../../core/entity'
-import { UUID } from '../../type'
 import {
   ConstructorPayload,
   CreatePayload,
@@ -8,6 +7,7 @@ import {
   EventDate,
   OpportunityHistory,
   STATE,
+  UUID
 } from './opportunity.type'
 
 export class Opportunity extends Entity<OpportunityType> {
