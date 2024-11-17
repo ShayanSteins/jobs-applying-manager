@@ -12,10 +12,10 @@
 const selected = defineModel()
 
 const options = [
-  "Postulation",
-  "Entretient RH",
-  "Entretient Tech",
-  "Autre entretient"
+  "Application",
+  "HR interview",
+  "Tech interview",
+  "Other interview"
 ]
 </script>
 

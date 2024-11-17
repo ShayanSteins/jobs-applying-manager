@@ -69,4 +69,8 @@ export class Opportunity extends Entity<OpportunityType> {
     }
     return STATE.NEW
   }
+
+  public getState() {
+    return this.state
+  }
 }

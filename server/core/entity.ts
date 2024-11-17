@@ -1,5 +1,4 @@
-import { UUID } from '../type'
-import { randomUUID } from 'crypto'
+import { randomUUID, UUID } from 'crypto'
 
 export abstract class Entity<T> {
   public readonly uuid: UUID
