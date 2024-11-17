@@ -32,8 +32,8 @@
         </div>
         <div class="buttonContainer">
           <button v-if="!isNewItem" @click="$emit('delete', opportunity)" class="deleteButton">Remove</button>
-          <button v-if="isNewItem" type="submit">Save</button>
-          <button v-else type="submit">Update</button>
+          <button v-if="isNewItem" type="submit" class="greenButton">Save</button>
+          <button v-else type="submit" class="greenButton">Update</button>
           <button @click="$emit('close')">Cancel</button>
         </div>
       </form>
@@ -47,7 +47,7 @@ import TextInput from './formComponents/TextInput.vue'
 import AvailableOptionsInput from './formComponents/AvailableOptionsInput.vue'
 import CheckboxInput from './formComponents/CheckboxInput.vue'
 import HistoryLine from './tableLine/HistoryLine.vue'
-import { createUUID, deepComparison, deepCopy } from "../common.js"
+import { generateUUID, deepComparison, deepCopy } from "../common.js"
 import { ref, onMounted, toValue, toRaw } from 'vue';
 
 const props = defineProps({
@@ -61,7 +61,7 @@ const props = defineProps({
     type: Object,
     default: () => {
       return {
-        id: createUUID(),
+        id: generateUUID(),
         state: "New",
         company: "",
         contact: "",
@@ -146,7 +146,7 @@ h1 {
   font-size: 1.6em;
   border-top-left-radius: 7px;
   border-top-right-radius: 7px;
-  background-color: var(--main-violet);
+  background-color: var(--main-color-theme);
 }
 
 .wholePiste {

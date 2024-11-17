@@ -7,7 +7,7 @@ import {
   EventDate,
   OpportunityHistory,
   STATE,
-  UUID
+  UUID,
 } from './opportunity.type'
 
 export class Opportunity extends Entity<OpportunityType> {
@@ -51,17 +51,17 @@ export class Opportunity extends Entity<OpportunityType> {
     this.dates = payload.dates
   }
 
-  static reconstitute(payload: ReconstitutePayload) {
-    return new Opportunity(payload, payload.uuid)
+  static reconstitute(payload: ReconstitutePayload): Opportunity {
+    const state = this.computeState(payload.closed, payload.dates)
+    return new Opportunity({ ...payload, state }, payload.uuid)
   }
 
-  static computedState(opportunity: OpportunityType): STATE {
-    if (opportunity.closed) {
+  private static computeState(isClosed: boolean, dates: EventDate[]): STATE {
+    if (isClosed) {
       return STATE.CLOSED
-    } else if (!!opportunity.dates && opportunity.dates.length > 0) {
-      const lastDate = opportunity.dates.at(-1)
-      if (lastDate!.type === 'Application')
-        return STATE.APPLIED
+    } else if (!!dates && dates.length > 0) {
+      const lastDate = dates.at(-1)
+      if (lastDate!.type === 'Application') return STATE.APPLIED
       else if (new Date(lastDate!.date) > new Date()) return STATE.MEETING_PLANNED
       else if (new Date(lastDate!.date) < new Date() && !lastDate!.answer)
         return STATE.WAITING_ANSWER

@@ -24,10 +24,10 @@
 </template>
 
 <script setup>
+import { generateUUID } from "../common.js"
 import SelectInput from "./formComponents/SelectInput.vue"
 import DateTimeInput from "./formComponents/DateTimeInput.vue"
 import DateLine from "./tableLine/DateLine.vue"
-import { createUUID } from "../common.js"
 import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -52,7 +52,7 @@ watch(dates, () => emit('change', dates))
 function addDate() {
   if (newDateType.value !== null && newDateType.value !== '' && newDateTime.value !== null && newDateTime.value !== '') {
     dates.value.push({
-      id: createUUID(),
+      id: generateUUID(),
       type: newDateType.value,
       date: new Date(newDateTime.value),
       answer: false

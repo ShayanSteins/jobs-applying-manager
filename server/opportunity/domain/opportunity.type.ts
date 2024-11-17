@@ -29,7 +29,7 @@ export type EventDate = {
 }
 
 export type CreatePayload = Omit<OpportunityType, 'uuid' | 'history' | 'state' | 'closed'>
-export type ReconstitutePayload = OpportunityType
+export type ReconstitutePayload = Omit<OpportunityType, 'state'>
 export type ConstructorPayload = Omit<OpportunityType, 'uuid'>
 
 export enum STATE {

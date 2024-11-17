@@ -1,15 +1,16 @@
 import { UseCase } from '../../../core/use-case'
-import { OpportunityType } from '../../domain/opportunity.type'
+import { Opportunity } from '../../domain/opportunity.entity'
 import { OpportunityRepositoryInterface } from '../../infra/opportunity.repository'
 
-export class UpdateUserOpportunityUseCase implements UseCase<OpportunityType> {
+export class UpdateUserOpportunityUseCase implements UseCase<Opportunity> {
   private opportunityRepository: OpportunityRepositoryInterface
 
   constructor(opportunityRepository: OpportunityRepositoryInterface) {
     this.opportunityRepository = opportunityRepository
   }
 
-  async execute(payload: { opportunity: OpportunityType }): Promise<OpportunityType> {
+  async execute(payload: { opportunity: Opportunity }): Promise<Opportunity> {
+
     return this.opportunityRepository.persist(payload.opportunity)
   }
 }

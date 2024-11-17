@@ -7,8 +7,9 @@ import { JsonOpportunityDataSource } from './opportunity/infra/opportunity.data-
 import { GetUserOpportunitiesUseCase } from './opportunity/app/use-case/get-user-opportunities.use-case'
 import { UpdateUserOpportunityUseCase } from './opportunity/app/use-case/update-user-opportunity.use-case'
 import { DeleteUserOpportunityUseCase } from './opportunity/app/use-case/delete-user-opportunity.use-case'
-import { OpportunityType, UUID } from './opportunity/domain/opportunity.type'
+import { UUID } from './opportunity/domain/opportunity.type'
 import { randomUUID } from 'crypto'
+import { Opportunity } from './opportunity/domain/opportunity.entity'
 const { clientId, clientSecret } = await import(OAuthKeysPath)
 
 const mimeType = {
@@ -48,7 +49,6 @@ export default class Router {
         )
 
         if (fileName === '/api/opportunity/all') {
-          // Get user file data
           const getUserOpportunitiesUseCase = new GetUserOpportunitiesUseCase(opportunityRepository)
           const opportunities = await getUserOpportunitiesUseCase.execute()
           this.sendData(res, 'json', opportunities)
@@ -95,7 +95,7 @@ export default class Router {
       }
     } catch (error) {
       console.error(error)
-      this.sendError(res, res.statusCode, error)
+      this.sendError(res, 500, "Internal Server Error: please retry later or contact an admin.")
     }
   }
 
@@ -187,30 +187,29 @@ export default class Router {
           response.on('end', () => {
             const result: { id: number } = JSON.parse(concatedDatas.toString())
             if (result.id !== undefined) resolve(result.id)
-            reject('bad token')
+            reject('Unable to connect due to a bad token. Please try again.')
           })
         })
         .end()
     })
   }
 
-  private parseData(datas: Buffer): OpportunityType {
+  private parseData(datas: Buffer): Opportunity {
     try {
       const parsedDatas = JSON.parse(datas.toString())
 
-      return parsedDatas.map((item) => ({
-        uuid: item.uuid ?? randomUUID(),
-        state: item.state,
-        company: item.company,
-        contact: item.contact,
-        location: item.location,
-        technologies: item.technologies,
-        url: item.url,
-        notes: item.notes,
-        history: item.history,
-        closed: item.closed,
-        dates: item.dates,
-      }))
+      return  Opportunity.reconstitute({
+        uuid: parsedDatas.uuid ?? randomUUID(),
+        company: parsedDatas.company,
+        contact: parsedDatas.contact,
+        location: parsedDatas.location,
+        technologies: parsedDatas.technologies,
+        url: parsedDatas.url,
+        notes: parsedDatas.notes,
+        history: parsedDatas.history,
+        closed: parsedDatas.closed,
+        dates: parsedDatas.dates,
+      })
     } catch (error) {
       console.error(error)
       throw error

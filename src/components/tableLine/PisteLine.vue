@@ -57,7 +57,7 @@ const getNextRdv = computed(() => {
 :hover {
   text-decoration: underline;
   cursor: pointer;
-  background-color: var(--main-lighter-violet);
+  background-color: var(--main-lighter-color-theme);
   color: var(--main-darker-bg-color);
 }
 

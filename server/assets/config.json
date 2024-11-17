@@ -2,6 +2,7 @@
   "basePath": "dist/",
   "serverPath": "server/",
   "dbPath": "server/assets/usersDB/",
+  "assetsPath": "server/assets/",
   "keyPath": "server/assets/key.pem",
   "certPath": "server/assets/cert.pem",
   "port": "4040",

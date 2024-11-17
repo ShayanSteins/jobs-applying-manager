@@ -1,7 +1,19 @@
+/**
+ * Generate a UUID
+ * @returns { string } generated UUID
+ */
+export function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
 
 /**
- * Renvoi la copie d'un objet complet et non de sa référence
- * @param {object | Array} inObject : objet à copier
+ * Return the copy of an entire object, not its reference
+ * @param {object | Array} inObject : array or object to copy
+ * @return {object | Array} the copied object/array
  */
 export function deepCopy(inObject) {
   let outObject, value, key
@@ -20,9 +32,10 @@ export function deepCopy(inObject) {
 }
 
 /**
- * Compare récurcivement un obj2 à un obj1. Retourne un tableau contenant le nom des différences, ou un tableau vide s'ils sont identiques
- * @param {object} obj1 : objet d'origine
- * @param {object} obj2 : objet à comparer
+ * Recursively compares two objects to return an array of their differences
+ * @param {object} obj1 : first object
+ * @param {object} obj2 : object to compare with
+ * @return {array} array of field name pr empty array if identical
  */
 export function deepComparison(obj1, obj2) {
   let modifications = []

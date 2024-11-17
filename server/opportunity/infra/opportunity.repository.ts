@@ -1,10 +1,11 @@
-import { OpportunityType, UUID } from '../domain/opportunity.type'
+import { Opportunity } from '../domain/opportunity.entity'
+import { UUID } from '../domain/opportunity.type'
 import { OpportunitiesDataSource } from './opportunity.data-source'
 
 export interface OpportunityRepositoryInterface {
-  getAllByUser(): Promise<OpportunityType[]>
-  persist(opportunity: OpportunityType): Promise<OpportunityType>
-  delete(uuids: UUID[]): Promise<OpportunityType[]>
+  getAllByUser(): Promise<Opportunity[]>
+  persist(opportunity: Opportunity): Promise<Opportunity>
+  delete(uuids: UUID[]): Promise<Opportunity[]>
 }
 
 export class OpportunityRepository implements OpportunityRepositoryInterface {
@@ -14,16 +15,16 @@ export class OpportunityRepository implements OpportunityRepositoryInterface {
     this.opportunitiesDataSource = opportunitiesDataSource
   }
 
-  async getAllByUser(): Promise<OpportunityType[]> {
+  async getAllByUser(): Promise<Opportunity[]> {
     return this.opportunitiesDataSource.getAll()
   }
 
-  async persist(opportunity: OpportunityType): Promise<OpportunityType> {
+  async persist(opportunity: Opportunity): Promise<Opportunity> {
     await this.opportunitiesDataSource.persist(opportunity)
     return opportunity
   }
 
-  async delete(uuids: UUID[]): Promise<OpportunityType[]> {
+  async delete(uuids: UUID[]): Promise<Opportunity[]> {
     const opportunities = await this.opportunitiesDataSource.delete(uuids)
     return opportunities
   }

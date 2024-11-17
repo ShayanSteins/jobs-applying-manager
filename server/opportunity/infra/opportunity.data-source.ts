@@ -1,11 +1,12 @@
 import fs from 'node:fs'
-import { dbPath } from '../../assets/config.json'
+import { dbPath, assetsPath } from '../../assets/config.json'
 import { OpportunityType, UUID } from '../domain/opportunity.type'
+import { Opportunity } from '../domain/opportunity.entity'
 
 export interface OpportunitiesDataSource {
-  getAll(): Promise<OpportunityType[]>
-  persist(opportunity: OpportunityType): void
-  delete(uuids: UUID[]): Promise<OpportunityType[]>
+  getAll(): Promise<Opportunity[]>
+  persist(opportunity: Opportunity): void
+  delete(uuids: UUID[]): Promise<Opportunity[]>
 }
 
 export class JsonOpportunityDataSource implements OpportunitiesDataSource {
@@ -17,16 +18,16 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
     console.log('Connected to DB')
   }
 
-  async getAll(): Promise<OpportunityType[]> {
+  async getAll(): Promise<Opportunity[]> {
     try {
       return this.getData()
     } catch (error) {
-      console.error(error)
+      console.error('Failed to fetch data: ', error)
       throw error
     }
   }
 
-  async persist(opportunity: OpportunityType): Promise<void> {
+  async persist(opportunity: Opportunity): Promise<void> {
     try {
       let content = await this.getData()
       let existingOpportunity = content.findIndex(
@@ -47,7 +48,7 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
     }
   }
 
-  async delete(uuids: UUID[]): Promise<OpportunityType[]> {
+  async delete(uuids: UUID[]): Promise<Opportunity[]> {
     try {
       const allOpportunities = await this.getData()
 
@@ -61,7 +62,6 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
 
       await this.putData(allOpportunities)
       return allOpportunities
-
     } catch (error) {
       console.error(error)
       throw error
@@ -70,15 +70,14 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
 
   private createFileIfNotExist(path: string, fileName: string): void {
     if (!fs.existsSync(path + fileName)) {
-      fs.copyFileSync(path + 'modelDatas.json', path + fileName)
+      fs.copyFileSync(assetsPath + 'modelDatas.json', path + fileName)
     }
   }
 
-  private async getData(): Promise<OpportunityType[]> {
+  private async getData(): Promise<Opportunity[]> {
     const jsonData = JSON.parse(fs.readFileSync(dbPath + `datas${this.primaryId}.json`, 'utf8'))
-    return jsonData.map((item: OpportunityType) => ({
+    return jsonData.map((item: OpportunityType) => Opportunity.reconstitute({
       uuid: item.uuid,
-      state: item.state,
       company: item.company,
       contact: item.contact,
       location: item.location,
@@ -91,7 +90,7 @@ export class JsonOpportunityDataSource implements OpportunitiesDataSource {
     }))
   }
 
-  private async putData(dataToWrite: OpportunityType[]): Promise<void> {
+  private async putData(dataToWrite: Opportunity[]): Promise<void> {
     fs.writeFileSync(dbPath + `datas${this.primaryId}.json`, JSON.stringify(dataToWrite))
   }
 }

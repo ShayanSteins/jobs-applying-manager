@@ -1,15 +1,15 @@
 import { UseCase } from '../../../core/use-case'
-import { OpportunityType } from '../../domain/opportunity.type'
+import { Opportunity } from '../../domain/opportunity.entity'
 import { OpportunityRepositoryInterface } from '../../infra/opportunity.repository'
 
-export class GetUserOpportunitiesUseCase implements UseCase<OpportunityType[]> {
+export class GetUserOpportunitiesUseCase implements UseCase<Opportunity[]> {
   private opportunityRepository: OpportunityRepositoryInterface
 
   constructor(opportunityRepository: OpportunityRepositoryInterface) {
     this.opportunityRepository = opportunityRepository
   }
 
-  async execute(): Promise<OpportunityType[]> {
+  async execute(): Promise<Opportunity[]> {    
     return this.opportunityRepository.getAllByUser()
   }
 }

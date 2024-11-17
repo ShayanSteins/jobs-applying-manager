@@ -4,10 +4,13 @@
       <span>Jobs Applying Manager</span>
     </header>
     <main>
-      <button @click="openPopin(false)">New</button>
-      <button class="deleteButton" @click="removeSelection" :disabled="deleteButtonDisabled">
-        Remove
-      </button>
+      <div class="action-panel">
+        <button @click="openPopin(false)">New</button>
+        <button class="deleteButton" @click="removeSelection" :disabled="deleteButtonDisabled">
+          Remove
+        </button>
+        <div class="error" v-if="errorMessage">{{ errorMessage }}</div>
+      </div>
       <transition name="fade">
         <PopIn v-if="popInDisplayed" :isNewItem="isNewItem" :currentOpportunity="currentOpportunity" @close="closePopin"
           @delete="removeSelection" @save="savePiste" :listTechno="technologiesList"></PopIn>
@@ -48,6 +51,7 @@ const currentOpportunity = ref(undefined)
 const idsToDelete = ref(new Set())
 const opportunities = ref(new Map())
 const token = ref(null)
+const errorMessage = ref(null)
 
 watchEffect(async () => {
   const list = new Set()
@@ -69,30 +73,9 @@ const technologiesList = computed(() => {
 
 const deleteButtonDisabled = computed(() => idsToDelete.value.size === 0)
 
-onBeforeMount(() => {
-  getAllPistes()
+onBeforeMount(async () => {
+  await getAllPistes()
 })
-
-function getAllPistes() {
-  token.value = new URL(document.location).searchParams.get('access-token')
-  const optReq = {
-    method: 'GET',
-    headers: new Headers({ 'access-token': token.value })
-  }
-  fetch('/api/opportunity/all', optReq)
-    .then((response) => {
-      return response.json()
-    })
-    .then((datas) => {
-      opportunities.value = new Map()
-      for (const item of datas) {
-        opportunities.value.set(item.uuid, { ...item, isSelected: false })
-      }
-    })
-    .catch((err) => {
-      throw err
-    })
-}
 
 function openPopin(isFromPisteTable, piste) {
   isNewItem.value = !isFromPisteTable
@@ -107,7 +90,34 @@ function closePopin() {
   popInDisplayed.value = false
 }
 
+async function getAllPistes() {
+  errorMessage.value = ''
+  token.value = new URL(document.location).searchParams.get('access-token')
+  const optReq = {
+    method: 'GET',
+    headers: new Headers({ 'access-token': token.value })
+  }
+
+  try {
+    const response = await fetch('/api/opportunity/all', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
+    }
+
+    const datas = await response.json();
+    opportunities.value = new Map()
+    for (const item of datas) {
+      opportunities.value.set(item.uuid, { ...item, isSelected: false })
+    }
+  } catch (error) {
+    opportunities.value = new Map()
+    errorMessage.value = error
+  }
+}
+
 async function savePiste(opportunityFromPopin) {
+  errorMessage.value = ''
   const opportunity = JSON.stringify(opportunityFromPopin)
   const optReq = {
     method: 'POST',
@@ -118,19 +128,26 @@ async function savePiste(opportunityFromPopin) {
     }),
     body: opportunity
   }
-  fetch('/api/opportunity/update', optReq)
-    .then((response) => {
-      return response.json()
-    })
-    .then((datas) => {
-      opportunities.value.set(datas.uuid, { ...datas, isSelected: false })
-    })
-    .catch((err) => console.log(err))
 
-  closePopin()
+  try {
+    const response = await fetch('/api/opportunity/update', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
+    }
+
+    const datas = await response.json();
+    opportunities.value.set(datas.uuid, { ...datas, isSelected: false })
+  } catch (error) {
+    errorMessage.value = error
+  } finally {
+    closePopin()
+  }
+
 }
 
-function removeSelection(eventFromPopup) {
+async function removeSelection(eventFromPopup) {
+  errorMessage.value = ''
   let oldSet = new Set()
 
   if (eventFromPopup !== undefined && !(eventFromPopup instanceof MouseEvent)) {
@@ -152,35 +169,25 @@ function removeSelection(eventFromPopup) {
     }),
     body: ids
   }
-  fetch('/api/opportunity/delete', optReq)
-    .then((response) => {
-      return response.json()
-    })
-    .then((datas) => {
-      opportunities.value.clear()
-      for (const item of datas) {
-        opportunities.value.set(item.uuid, { ...item, isSelected: false })
-      }
-    })
-    .catch((err) => console.log(err))
 
-  idsToDelete.value = oldSet
-  closePopin()
-}
+  try {
+    const response = await fetch('/api/opportunity/delete', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
+    }
 
-function saveAllPistes() {
-  const datas = JSON.stringify(mapToArray(opportunities.value, true))
-  const optReq = {
-    method: 'POST',
-    headers: new Headers({
-      'access-token': token.value,
-      'Content-Type': 'application/json',
-      'Content-Length': datas.length
-    }),
-    body: datas
+    const datas = await response.json();
+    opportunities.value.clear()
+    for (const item of datas) {
+      opportunities.value.set(item.uuid, { ...item, isSelected: false })
+    }
+  } catch (error) {
+    errorMessage.value = error
+  } finally {
+    idsToDelete.value = oldSet
+    closePopin()
   }
-  fetch('/api/update/pistes', optReq)
-    .catch((err) => console.log(err))
 }
 
 function mapToArray(obj, arrayWanted) {
@@ -202,13 +209,14 @@ function mapToArray(obj, arrayWanted) {
 
 <style>
 :root {
-  --main-bg-color: rgb(43, 43, 43);
-  --main-darker-bg-color: rgb(20, 20, 20);
-  --main-lighter-bg-color: rgb(87, 87, 87);
+  --main-bg-color: rgb(55, 50, 62);
+  --main-darker-bg-color: rgb(27, 26, 29);
+  --main-lighter-bg-color: rgb(157, 155, 159);
   --main-text-color: rgb(248, 248, 248);
-  --main-violet: rgb(76, 53, 147);
-  --main-lighter-violet: rgb(175, 147, 235);
-  --main-red: rgb(161, 27, 27);
+  --main-color-theme: rgb(26, 120, 158);
+  --main-lighter-color-theme: rgb(142, 202, 230);
+  --main-error-color: rgb(134, 41, 21);
+  --main-valid-color: rgb(103, 148, 54);
   --shadow-element: 3px 5px 12px rgb(21 21 21 / 78%);
 }
 
@@ -225,7 +233,7 @@ header {
   padding: 0.5em 0;
   text-align: center;
   font-size: 2em;
-  background-color: var(--main-violet);
+  background-color: var(--main-color-theme);
 }
 
 main {
@@ -234,14 +242,18 @@ main {
 
 button {
   font-size: 1em;
-  background: var(--main-violet);
+  background: var(--main-color-theme);
   color: var(--main-text-color);
   border: none;
   padding: 10px 15px;
 }
 
 button.deleteButton {
-  background-color: var(--main-red);
+  background-color: var(--main-error-color);
+}
+
+button.greenButton {
+  background-color: var(--main-valid-color);
 }
 
 button:hover {
@@ -282,7 +294,7 @@ th {
   font-weight: lighter;
   height: 30px;
   background: var(--main-darker-bg-color);
-  color: var(--main-lighter-violet);
+  color: var(--main-text-color);
 }
 
 th,
@@ -344,5 +356,14 @@ td {
 .genericInput {
   margin: 0;
   padding: 10px;
+}
+
+.action-panel {
+  display: flex;
+}
+
+.error {
+  margin-left: 1.5rem;
+  color: rgb(197, 53, 22)
 }
 </style>
