@@ -23,7 +23,8 @@
     "build": "parcel build src/index.html --public-url ./",
     "serve": "npx tsx server/index.ts",
     "check": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "coverage": "jest --coverage ./server --collectCoverageFrom='./server/**/*.{ts,tsx}'"
   },
   "repository": {
     "type": "git",

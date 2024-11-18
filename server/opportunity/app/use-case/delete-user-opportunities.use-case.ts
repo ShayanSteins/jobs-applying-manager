@@ -3,7 +3,7 @@ import { Opportunity } from '../../domain/opportunity.entity'
 import { UUID } from '../../domain/opportunity.type'
 import { OpportunityRepositoryInterface } from '../../infra/opportunity.repository'
 
-export class DeleteUserOpportunityUseCase implements UseCase<Opportunity[]> {
+export class DeleteUserOpportunitiesUseCase implements UseCase<Opportunity[]> {
   private opportunityRepository: OpportunityRepositoryInterface
 
   constructor(opportunityRepository: OpportunityRepositoryInterface) {

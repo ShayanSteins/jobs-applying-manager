@@ -2,7 +2,60 @@ import { Opportunity } from './opportunity.entity'
 import { randomUUID } from 'crypto'
 import { STATE } from './opportunity.type'
 
-describe('computeState', () => {
+describe('Create oppotunity checks', () => {
+  it('throws when company is missing', () => {
+    // Given
+    const payloadWithemptyCompany = {
+      company: '',
+      contact: '',
+      location: 'Lyon',
+      technologies: 'Express.js, node.js, TS',
+      url: '',
+      notes: '',
+      dates: [
+        {
+          uuid: randomUUID(),
+          type: 'Application',
+          date: '2024-11-11T10:00:00.000Z',
+          answer: false,
+        },
+      ],
+    }
+
+    // When/Then
+    expect(() => {
+      Opportunity.create(payloadWithemptyCompany)
+    }).toThrow(new Error('Missing company'))
+  })
+
+  it('should create an opportunity', () => {
+    // Given
+    const payload = {
+      company: 'Random Company',
+      contact: '',
+      location: 'Lyon',
+      technologies: 'Express.js, node.js, TS',
+      url: '',
+      notes: '',
+      dates: [
+        {
+          uuid: randomUUID(),
+          type: 'Application',
+          date: '2024-11-11T10:00:00.000Z',
+          answer: false,
+        },
+      ],
+    }
+
+    // When    
+    const newOpportunity: Opportunity = Opportunity.create(payload)
+
+    // Then
+    expect(newOpportunity).toBeInstanceOf(Opportunity)
+  })
+})
+
+describe('Reconstitue opportunity checks', () => {
   const applicationDate = {
     uuid: randomUUID(),
     type: 'Application',
@@ -10,7 +63,7 @@ describe('computeState', () => {
     answer: false,
   }
 
-  test('New Opportunity', () => {
+  it('New Opportunity', () => {
     // Given
     const newOpportunity = Opportunity.reconstitute({
       uuid: randomUUID(),
@@ -29,7 +82,7 @@ describe('computeState', () => {
     expect(newOpportunity).toBeInstanceOf(Opportunity)
     expect(newOpportunity.getState()).toEqual(STATE.NEW)
   })
-  test('Applied Opportunity', () => {
+  it('Applied Opportunity', () => {
     // Given
     const appliedOpportunity = Opportunity.reconstitute({
       uuid: randomUUID(),
@@ -47,7 +100,7 @@ describe('computeState', () => {
     // Then
     expect(appliedOpportunity.getState()).toEqual(STATE.APPLIED)
   })
-  test('Meeting planned Opportunity', () => {
+  it('Meeting planned Opportunity', () => {
     // Given
     const plannedOpportunity = Opportunity.reconstitute({
       uuid: randomUUID(),
@@ -73,7 +126,7 @@ describe('computeState', () => {
     // Then
     expect(plannedOpportunity.getState()).toEqual(STATE.MEETING_PLANNED)
   })
-  test('Waiting for an answer Opportunity', () => {
+  it('Waiting for an answer Opportunity', () => {
     // Given
     const waitingOpportunity = Opportunity.reconstitute({
       uuid: randomUUID(),
@@ -99,7 +152,7 @@ describe('computeState', () => {
     // Then
     expect(waitingOpportunity.getState()).toEqual(STATE.WAITING_ANSWER)
   })
-  test('Action requiered Opportunity', () => {
+  it('Action requiered Opportunity', () => {
     // Given
     const actionOpportunity = Opportunity.reconstitute({
       uuid: randomUUID(),
@@ -125,7 +178,7 @@ describe('computeState', () => {
     // Then
     expect(actionOpportunity.getState()).toEqual(STATE.ACTION_REQUIRED)
   })
-  test('Closed Opportunity', () => {
+  it('Closed Opportunity', () => {
     // Given
     const closedOpportunity = Opportunity.reconstitute({
       uuid: randomUUID(),
@@ -137,9 +190,7 @@ describe('computeState', () => {
       notes: '',
       history: [{ date: '2024-11-11T15:00:00', modification: 'File initialization' }],
       closed: true,
-      dates: [
-        applicationDate
-      ],
+      dates: [applicationDate],
     })
 
     // Then

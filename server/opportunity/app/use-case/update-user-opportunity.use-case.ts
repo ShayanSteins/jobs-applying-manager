@@ -10,7 +10,6 @@ export class UpdateUserOpportunityUseCase implements UseCase<Opportunity> {
   }
 
   async execute(payload: { opportunity: Opportunity }): Promise<Opportunity> {
-
     return this.opportunityRepository.persist(payload.opportunity)
   }
 }

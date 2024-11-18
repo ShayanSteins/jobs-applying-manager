@@ -22,7 +22,7 @@ export class Opportunity extends Entity<OpportunityType> {
   private closed: boolean
   private dates: EventDate[]
 
-  static create(payload: CreatePayload) {
+  static create(payload: CreatePayload): Opportunity {
     if (!payload.company) throw new Error('Missing company')
     return new Opportunity({
       state: STATE.NEW,

@@ -6,20 +6,22 @@ import { OpportunityRepository } from './opportunity/infra/opportunity.repositor
 import { JsonOpportunityDataSource } from './opportunity/infra/opportunity.data-source'
 import { GetUserOpportunitiesUseCase } from './opportunity/app/use-case/get-user-opportunities.use-case'
 import { UpdateUserOpportunityUseCase } from './opportunity/app/use-case/update-user-opportunity.use-case'
-import { DeleteUserOpportunityUseCase } from './opportunity/app/use-case/delete-user-opportunity.use-case'
+import { DeleteUserOpportunitiesUseCase } from './opportunity/app/use-case/delete-user-opportunities.use-case'
 import { UUID } from './opportunity/domain/opportunity.type'
 import { randomUUID } from 'crypto'
 import { Opportunity } from './opportunity/domain/opportunity.entity'
 const { clientId, clientSecret } = await import(OAuthKeysPath)
 
-const mimeType = {
-  css: 'text/css',
-  js: 'application/javascript',
-  map: 'application/javascript',
-  html: 'text/html',
-  json: 'application/json',
-  svg: 'image/svg+xml',
+enum MIME_TYPES {
+  css = 'text/css',
+  js = 'application/javascript',
+  map = 'application/javascript',
+  html = 'text/html',
+  json = 'application/json',
+  svg = 'image/svg+xml',
 }
+
+type mimeTypesStrings = keyof typeof MIME_TYPES
 
 export default class Router {
   async handle(req: IncomingMessage, res: ServerResponse) {
@@ -32,7 +34,6 @@ export default class Router {
       if (fileName === '/') {
         // Redirect to github Auth if user is not logged in yet
         this.redirect(res, 301, `https://github.com/login/oauth/authorize?client_id=${clientId}`)
-
       } else if (fileName.match(/^(\/oauth-callback)/) !== null) {
         // Temporary code recovery and access_token request
         const code = url.searchParams.get('code')
@@ -41,7 +42,6 @@ export default class Router {
         } else {
           this.sendError(res, 403, '403 - Access denied')
         }
-
       } else if (fileName.match(/^(\/api\/opportunity)/) !== null) {
         const userId = await this.checkToken(req.headers)
         const opportunityRepository = new OpportunityRepository(
@@ -52,7 +52,6 @@ export default class Router {
           const getUserOpportunitiesUseCase = new GetUserOpportunitiesUseCase(opportunityRepository)
           const opportunities = await getUserOpportunitiesUseCase.execute()
           this.sendData(res, 'json', opportunities)
-
         } else if (fileName === '/api/opportunity/update') {
           let concatedDatas = Buffer.alloc(0)
           req.on('data', (datas) => {
@@ -67,14 +66,13 @@ export default class Router {
             })
             this.sendData(res, 'json', opportunity)
           })
-
         } else if (fileName === '/api/opportunity/delete') {
           let concatedDatas = Buffer.alloc(0)
           req.on('data', (datas) => {
             concatedDatas = Buffer.concat([concatedDatas, datas])
           })
           req.on('end', async () => {
-            const deleteUserOpportunityUseCase = new DeleteUserOpportunityUseCase(
+            const deleteUserOpportunityUseCase = new DeleteUserOpportunitiesUseCase(
               opportunityRepository
             )
             const uuids: UUID[] = JSON.parse(concatedDatas.toString())
@@ -84,30 +82,33 @@ export default class Router {
             this.sendData(res, 'json', opportunity)
           })
         }
-
       } else if (!fs.existsSync(basePath + fileName)) {
         // 404 ERROR
         this.sendError(res, 404, '404 - File not found... (T-T)')
-        
       } else {
         // Nominal case for html, js, css, images files
         this.sendFile(res, extension, basePath, fileName)
       }
     } catch (error) {
       console.error(error)
-      this.sendError(res, 500, "Internal Server Error: please retry later or contact an admin.")
+      this.sendError(res, 500, 'Internal Server Error: please retry later or contact an admin.')
     }
   }
 
   private sendData(res: ServerResponse, extension: string, data: any) {
     res.statusCode = 200
-    res.setHeader('Content-Type', mimeType[extension])
+    res.setHeader('Content-Type', MIME_TYPES[extension as mimeTypesStrings])
     res.end(JSON.stringify(data))
   }
 
-  private sendFile(res: ServerResponse, extension: string, path: string, fileName: string) {
+  private sendFile(
+    res: ServerResponse,
+    extension: string,
+    path: string,
+    fileName: string
+  ) {
     res.statusCode = 200
-    res.setHeader('Content-Type', mimeType[extension])
+    res.setHeader('Content-Type', MIME_TYPES[extension as mimeTypesStrings])
     res.end(fs.readFileSync(path + fileName))
   }
 
@@ -198,7 +199,7 @@ export default class Router {
     try {
       const parsedDatas = JSON.parse(datas.toString())
 
-      return  Opportunity.reconstitute({
+      return Opportunity.reconstitute({
         uuid: parsedDatas.uuid ?? randomUUID(),
         company: parsedDatas.company,
         contact: parsedDatas.contact,
