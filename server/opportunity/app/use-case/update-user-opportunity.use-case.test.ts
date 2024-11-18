@@ -1,20 +1,8 @@
 import { randomUUID } from 'crypto'
 import { Opportunity } from '../../domain/opportunity.entity'
-import { UUID } from '../../domain/opportunity.type'
 import { OpportunityRepositoryInterface } from '../../infra/opportunity.repository'
 import { UpdateUserOpportunityUseCase } from './update-user-opportunity.use-case'
-
-class MockOpportunityRepository implements OpportunityRepositoryInterface {
-  getAllByUser(): Promise<Opportunity[]> {
-    throw new Error('Method not implemented.')
-  }
-  persist(opportunity: Opportunity): Promise<Opportunity> {
-    throw new Error('Method not implemented.')
-  }
-  delete(uuids: UUID[]): Promise<Opportunity[]> {
-    throw new Error('Method not implemented.')
-  }
-}
+import { MockOpportunityRepository } from '../../../utils/mocks'
 
 describe('UpdateUserOpportunitiesUseCase tests', () => {
   let opportunityRepository: OpportunityRepositoryInterface

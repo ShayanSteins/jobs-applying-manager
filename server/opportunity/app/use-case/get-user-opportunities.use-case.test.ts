@@ -1,38 +1,13 @@
 import { randomUUID } from 'crypto'
 import { Opportunity } from '../../domain/opportunity.entity'
-import { UUID } from '../../domain/opportunity.type'
 import { OpportunityRepositoryInterface } from '../../infra/opportunity.repository'
 import { GetUserOpportunitiesUseCase } from './get-user-opportunities.use-case'
+import { MockOpportunityRepository, reconstituteOpportunityPayload } from '../../../utils/mocks'
 
-class MockOpportunityRepository implements OpportunityRepositoryInterface {
-  getAllByUser(): Promise<Opportunity[]> {
-    throw new Error('Method not implemented.')
-  }
-  persist(opportunity: Opportunity): Promise<Opportunity> {
-    throw new Error('Method not implemented.')
-  }
-  delete(uuids: UUID[]): Promise<Opportunity[]> {
-    throw new Error('Method not implemented.')
-  }
-}
-
-const uuid1 = randomUUID()
-const uuid2 = randomUUID()
 const expectedResults: Opportunity[] = [
+  Opportunity.reconstitute(reconstituteOpportunityPayload),
   Opportunity.reconstitute({
-    uuid: uuid1,
-    company: 'Random Company',
-    contact: '',
-    location: 'Nantes',
-    technologies: 'Vue 3, node.js, TS',
-    url: '',
-    notes: '',
-    history: [{ date: '2024-11-11T22:50:08', modification: 'Opportunity creation.' }],
-    closed: false,
-    dates: [],
-  }),
-  Opportunity.reconstitute({
-    uuid: uuid2,
+    uuid: randomUUID(),
     company: 'Another Company',
     contact: '',
     location: 'Paris',

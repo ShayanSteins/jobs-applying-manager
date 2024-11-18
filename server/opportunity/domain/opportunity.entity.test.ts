@@ -1,6 +1,7 @@
 import { Opportunity } from './opportunity.entity'
 import { randomUUID } from 'crypto'
 import { STATE } from './opportunity.type'
+import { reconstituteOpportunityPayload } from '../../utils/mocks'
 
 describe('Create oppotunity checks', () => {
   it('throws when company is missing', () => {
@@ -47,7 +48,7 @@ describe('Create oppotunity checks', () => {
       ],
     }
 
-    // When    
+    // When
     const newOpportunity: Opportunity = Opportunity.create(payload)
 
     // Then
@@ -65,18 +66,7 @@ describe('Reconstitue opportunity checks', () => {
 
   it('New Opportunity', () => {
     // Given
-    const newOpportunity = Opportunity.reconstitute({
-      uuid: randomUUID(),
-      company: 'Company Example',
-      contact: 'Radom Person',
-      location: 'London',
-      technologies: 'node.js, Vue 3, TS',
-      url: '',
-      notes: '',
-      history: [{ date: '2024-11-11T15:00:00', modification: 'File initialization' }],
-      closed: false,
-      dates: [],
-    })
+    const newOpportunity = Opportunity.reconstitute(reconstituteOpportunityPayload)
 
     // Then
     expect(newOpportunity).toBeInstanceOf(Opportunity)
@@ -85,16 +75,8 @@ describe('Reconstitue opportunity checks', () => {
   it('Applied Opportunity', () => {
     // Given
     const appliedOpportunity = Opportunity.reconstitute({
-      uuid: randomUUID(),
-      company: 'Company Example',
-      contact: 'Radom Person',
-      location: 'London',
-      technologies: 'node.js, Vue 3, TS',
-      url: '',
-      notes: '',
-      history: [{ date: '2024-11-11T15:00:00', modification: 'File initialization' }],
-      closed: false,
-      dates: [applicationDate],
+      ...reconstituteOpportunityPayload,
+      dates: [applicationDate]
     })
 
     // Then
@@ -103,15 +85,7 @@ describe('Reconstitue opportunity checks', () => {
   it('Meeting planned Opportunity', () => {
     // Given
     const plannedOpportunity = Opportunity.reconstitute({
-      uuid: randomUUID(),
-      company: 'Company Example',
-      contact: 'Radom Person',
-      location: 'London',
-      technologies: 'node.js, Vue 3, TS',
-      url: '',
-      notes: '',
-      history: [{ date: '2024-11-11T15:00:00', modification: 'File initialization' }],
-      closed: false,
+      ...reconstituteOpportunityPayload, 
       dates: [
         applicationDate,
         {
@@ -129,15 +103,7 @@ describe('Reconstitue opportunity checks', () => {
   it('Waiting for an answer Opportunity', () => {
     // Given
     const waitingOpportunity = Opportunity.reconstitute({
-      uuid: randomUUID(),
-      company: 'Company Example',
-      contact: 'Radom Person',
-      location: 'London',
-      technologies: 'node.js, Vue 3, TS',
-      url: '',
-      notes: '',
-      history: [{ date: '2024-11-11T15:00:00', modification: 'File initialization' }],
-      closed: false,
+      ...reconstituteOpportunityPayload,
       dates: [
         applicationDate,
         {
@@ -155,15 +121,7 @@ describe('Reconstitue opportunity checks', () => {
   it('Action requiered Opportunity', () => {
     // Given
     const actionOpportunity = Opportunity.reconstitute({
-      uuid: randomUUID(),
-      company: 'Company Example',
-      contact: 'Radom Person',
-      location: 'London',
-      technologies: 'node.js, Vue 3, TS',
-      url: '',
-      notes: '',
-      history: [{ date: '2024-11-11T15:00:00', modification: 'File initialization' }],
-      closed: false,
+      ...reconstituteOpportunityPayload,
       dates: [
         applicationDate,
         {
@@ -181,14 +139,7 @@ describe('Reconstitue opportunity checks', () => {
   it('Closed Opportunity', () => {
     // Given
     const closedOpportunity = Opportunity.reconstitute({
-      uuid: randomUUID(),
-      company: 'Company Example',
-      contact: 'Radom Person',
-      location: 'London',
-      technologies: 'node.js, Vue 3, TS',
-      url: '',
-      notes: '',
-      history: [{ date: '2024-11-11T15:00:00', modification: 'File initialization' }],
+      ...reconstituteOpportunityPayload,
       closed: true,
       dates: [applicationDate],
     })
