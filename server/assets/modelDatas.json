@@ -1,36 +1,36 @@
 [
   {
-    "id": "Ida5416918-a08f-4297-a1f7-4a7b85db02b4",
-    "etat": "Nouvelle",
-    "societe": "Example",
-    "interlocuteur": "Dupont Cécile",
-    "localisation": "Paris",
-    "technos": "NodeJS, VueJS",
+    "uuid": "Ida5416918-a08f-4297-a1f7-4a7b85db02b4",
+    "state": "Meeting planned",
+    "company": "Example",
+    "contact": "Dupont Cécile",
+    "location": "Paris",
+    "technologies": "NodeJS, VueJS",
     "closed": false,
     "dates": [
       {
-        "id": 0,
-        "type": "Postulation",
-        "date": "2020-09-09T14:00",
-        "retour": true
+        "uuid": "Id162cf050-62ff-401f-8e76-a99b4281b63c",
+        "type": "Application",
+        "date": "2024-09-09T14:00",
+        "answer": true
       },
       {
-        "id": 2,
-        "type": "Entretient RH",
-        "date": "2021-10-28T18:00",
-        "retour": false
+        "uuid": "Id5bb2883b-2c01-44df-b911-ed95c667f36d",
+        "type": "HR Interview",
+        "date": "2024-10-28T18:00",
+        "answer": false
       }
     ],
-    "liens": "http://google.com",
+    "url": "http://google.com",
     "notes": "Ceci est une piste d'example",
-    "historique": [
+    "history": [
       {
-        "date": "2020-09-03T13:06:35",
-        "modif": "Création de la piste"
+        "date": "2024-09-03T13:06:35",
+        "modification": "Création de la piste"
       },
       {
-        "date": "2020-09-09T10:00:00",
-        "modif": "Modification du champ : Société"
+        "date": "2024-09-09T10:00:00",
+        "modification": "Modification du champ : Société"
       }
     ]
   }

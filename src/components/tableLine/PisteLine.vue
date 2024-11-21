@@ -1,14 +1,14 @@
 <template>
-  <tr @click="(e) => { if (e.target.type !== 'checkbox') $emit('open-popin', true, piste) }"
-    :class="{ closed: piste.closed }">
+  <tr @click="(e) => { if (e.target.type !== 'checkbox') $emit('open-popin', true, opportunity) }"
+    :class="{ closed: opportunity.closed }">
     <td>
-      <CheckBoxInput labelName v-model="dataChecked" @change="$emit('check', [piste.id, $event])" />
+      <CheckBoxInput labelName="" v-model:checked="opportunity.isSelected" />
     </td>
-    <td>{{ piste.etat }}</td>
-    <td>{{ piste.societe }}</td>
-    <td>{{ piste.localisation }}</td>
+    <td>{{ opportunity.state }}</td>
+    <td>{{ opportunity.company }}</td>
+    <td>{{ opportunity.location }}</td>
     <td>{{ getNextRdv }}</td>
-    <td>{{ piste.interlocuteur }}</td>
+    <td>{{ opportunity.contact }}</td>
   </tr>
 </template>
 
@@ -17,34 +17,30 @@ import CheckBoxInput from '../formComponents/CheckboxInput.vue'
 import { computed, ref } from 'vue'
 
 const props = defineProps({
-  piste: {
+  opportunity: {
     type: Object
-  },
-  checked: {
-    type: Boolean,
-    default: false
   }
 })
 
-const dataChecked = ref(props.checked)
+const currentOpportunity = ref(props.opportunity)
 
 defineEmits(['open-popin', 'check'])
 
 const getNextRdv = computed(() => {
   // Vérification du format des dates
-  props.piste.dates.forEach(d => {
+  props.opportunity.dates.forEach(d => {
     if (typeof d.date === "string") {
       d.date = new Date(d.date)
     }
   })
 
   let nextRdv = "Aucun rdv"
-  if (undefined !== props.piste.dates && props.piste.dates.length > 0) {
+  if (undefined !== props.opportunity.dates && props.opportunity.dates.length > 0) {
     //Tri des dates par ordre croissant
-    props.piste.dates.sort((a, b) => a.date - b.date)
+    props.opportunity.dates.sort((a, b) => a.date - b.date)
 
     // Récupère la première date supérieure à la date du jour  
-    const newRdvList = props.piste.dates.filter(d => d.date > new Date())
+    const newRdvList = props.opportunity.dates.filter(d => d.date > new Date())
 
     // Si il y a un rdv à venir
     if (newRdvList.length > 0) {
@@ -61,7 +57,7 @@ const getNextRdv = computed(() => {
 :hover {
   text-decoration: underline;
   cursor: pointer;
-  background-color: var(--main-lighter-violet);
+  background-color: var(--main-lighter-color-theme);
   color: var(--main-darker-bg-color);
 }
 

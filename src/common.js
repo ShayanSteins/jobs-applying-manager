@@ -1,24 +1,19 @@
 /**
- * Génération d'un ID unique
+ * Generate a UUID
+ * @returns { string } generated UUID
  */
-export function createUUID() {
-  // http://www.ietf.org/rfc/rfc4122.txt
-  var s = []
-  var hexDigits = '0123456789abcdef'
-  for (var i = 0; i < 36; i++) {
-    s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1)
-  }
-  s[14] = '4' // bits 12-15 of the time_hi_and_version field to 0010
-  s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1) // bits 6-7 of the clock_seq_hi_and_reserved to 01
-  s[8] = s[13] = s[18] = s[23] = '-'
-
-  var uuid = s.join('')
-  return 'Id' + uuid
+export function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
 }
 
 /**
- * Renvoi la copie d'un objet complet et non de sa référence
- * @param {object | Array} inObject : objet à copier
+ * Return the copy of an entire object, not its reference
+ * @param {object | Array} inObject : array or object to copy
+ * @return {object | Array} the copied object/array
  */
 export function deepCopy(inObject) {
   let outObject, value, key
@@ -37,9 +32,10 @@ export function deepCopy(inObject) {
 }
 
 /**
- * Compare récurcivement un obj2 à un obj1. Retourne un tableau contenant le nom des différences, ou un tableau vide s'ils sont identiques
- * @param {object} obj1 : objet d'origine
- * @param {object} obj2 : objet à comparer
+ * Recursively compares two objects to return an array of their differences
+ * @param {object} obj1 : first object
+ * @param {object} obj2 : object to compare with
+ * @return {array} array of field name pr empty array if identical
  */
 export function deepComparison(obj1, obj2) {
   let modifications = []

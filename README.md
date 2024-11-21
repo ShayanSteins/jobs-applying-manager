@@ -10,22 +10,27 @@ English version [here](README_en.md).
 5. [Utilisation](#utilisation)  
   5.1 [Client](#client)  
   5.2 [Serveur](#serveur)  
+  5.3 [Tests](#tests)  
 6. [Changelog](#changelog)  
-  6.1 [v2.0](#v20)  
-  6.2 [v1.0](#v10)  
+  6.1 [v3.0](#v30)  
+  6.2 [v2.0](#v20)  
+  6.3 [v1.0](#v10)  
 
 
 ## Informations générales
 
 jobs-applying-manager est une application d'aide à la recherche d'emploi via un tableau de suivi de piste.  
 Ainsi il est possible de saisir les différentes opportunités qui vous intéresse et de visualiser d'un seul coup d'oeil l'avancé de chacune.
+Il s'agit principalement d'un projet d'entrainement.
 
 
 ## Technologies
 
-- [VueJS - v2.6.12](https://vuejs.org/)
-- [NodeJS - v14.15.4](https://nodejs.org/en/)
-- [Parcel Bundler - 1.12.4](https://parceljs.org/)
+- [VueJS 3](https://vuejs.org/)
+- [NodeJS](https://nodejs.org/en/)
+- [Typescript](https://www.typescriptlang.org/)
+- [Jest](https://jestjs.io/fr/)
+- [Parcel Bundler](https://parceljs.org/)
 
 
 ## Installation
@@ -52,7 +57,9 @@ Modifiez le fichier de configuration [config.json](/server/assets/config.json) s
 ```json
 {
   "basePath" : <chemin d'accès au dossier build de parcel>, 
-  "servPath" : <chemin d'accès au dossier server de l'appli>,
+  "serverPath" : <chemin d'accès au dossier server de l'appli>,
+  "dbPath": <chemin d'accès au dossier userDB>,
+  "assetsPath": <chemin d'accès au dossier assets>,
   "keyPath" : <chemin d'accès au fichier 'key.pem'>,
   "certPath" : <chemin d'accès au fichier 'cert.pem'>,
   "port" : <port d'écoute du serveur>,
@@ -62,27 +69,36 @@ Modifiez le fichier de configuration [config.json](/server/assets/config.json) s
 
 ## Utilisation
 
+Voici la liste des commandes utilisables dans ce projet :
+
 ### Client
 
-Lancez la commande suivante pour le mode développement du client uniquement :
-
-    npm run dev
-
-Lancez la commande suivante pour le mode développement du client avec le serveur :
-
-    npm run watch
-
-Lancez la commande suivante pour générer la version build exécutable : 
-
-    npm run build
+- `npm run dev` : mode développement du client
+- `npm run watch` : mode développement du client avec hot-reload
+- `npm run build` : génère la version build exécutable
 
 ### Serveur
 
-Lancez la commande suivante pour démarrer le serveur : 
+- `npm run build` : démarre le serveur
 
-    node <chemin d'accès au fichier index.js du serveur>
+### Tests
+
+- `npm run check` : lance les checks TS
+- `npm run test` : lance les tests unitaires
+- `npm run coverage` : lance les tests et calcul le coverage
+
 
 ## Changelog
+
+### v3.0
+
+Les modifications suivantes ont été apportées à la version 3 :
+
+- Mises à jour de l'ensemble des librairies et corrections des vulnerabilities
+- Migration de Vue 2 à Vue 3 en Composition API
+- Ajout de Typescript dans le backend
+- Refactor du backend pour se diriger vers une Architecture Hexagonale et du Domain-Driven Design (DDD)
+- Ajout de tests unitaires avec Jest
 
 ### v2.0  
 

@@ -1,7 +1,9 @@
 node_modules
 dist
+coverage
 .parcel-cache
 .vscode
 key.json
 *-lock.json
 *.pem
+server/assets/usersDB/*.json

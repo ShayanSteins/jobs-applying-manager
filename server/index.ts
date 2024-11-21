@@ -1,10 +1,10 @@
-import Server from './server.js'
-import Router from './router.js'
+import Server from './server'
+import Router from './router'
 
 try {
   new Server()
     .registerRouter(new Router())
     .start()
 } catch (error) {
-  console.log(error)
+  console.error(error)
 }

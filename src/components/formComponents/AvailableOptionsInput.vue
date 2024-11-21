@@ -75,6 +75,6 @@ option {
 }
 
 option:hover {
-  background-color: var(--main-lighter-violet);
+  background-color: var(--main-lighter-color-theme);
 }
 </style>

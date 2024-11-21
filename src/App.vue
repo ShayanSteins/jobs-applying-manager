@@ -4,32 +4,35 @@
       <span>Jobs Applying Manager</span>
     </header>
     <main>
-      <button @click="openPopin(false)">Nouveau</button>
-      <button class="deleteButton" @click="removePiste" :disabled="deleteButtonDisabled === 0">
-        Supprimer
-      </button>
+      <div class="action-panel">
+        <button @click="openPopin(false)">New</button>
+        <button class="deleteButton" @click="removeSelection" :disabled="deleteButtonDisabled">
+          Remove
+        </button>
+        <div class="error" v-if="errorMessage">{{ errorMessage }}</div>
+      </div>
       <transition name="fade">
-        <PopIn v-if="popInDisplayed" :isNewItem="isNewItem" :pisteToModify="pisteToModify" @close="closePopin"
-          @delete="removePiste" @check="checkedPiste" @save="savePiste" :listTechno="technologiesList"></PopIn>
+        <PopIn v-if="popInDisplayed" :isNewItem="isNewItem" :currentOpportunity="currentOpportunity" @close="closePopin"
+          @delete="removeSelection" @save="savePiste" @close-opportunity="closeOpportunity"
+          :listTechno="technologiesList"></PopIn>
       </transition>
       <div class="boardContent">
         <table class="shadow">
           <thead>
             <th></th>
-            <th>Etat</th>
-            <th>Société</th>
-            <th>Localisation</th>
-            <th>Prochain rdv</th>
-            <th>Interlocuteur</th>
+            <th>State</th>
+            <th>Company</th>
+            <th>Location</th>
+            <th>Next step</th>
+            <th>Contact</th>
           </thead>
-          <tr v-if="!pistes.size">
+          <tr v-if="!opportunities.size">
             <td colspan="6">
-              Vous n'avez aucune piste pour le moment... Il est temps de
-              parcourir les sites d'annonces
+              You don't have any job opportunity yet...
             </td>
           </tr>
-          <PisteLine v-for="[id, piste] in pistes" :key="id" :piste="piste" @open-popin="openPopin"
-            @check="checkedPiste"></PisteLine>
+          <PisteLine v-for="[id, opportunity] in opportunities" :key="id" :opportunity="opportunity"
+            @open-popin="openPopin"></PisteLine>
         </table>
         <div class="notif">Notifications</div>
       </div>
@@ -41,135 +44,179 @@
 import PopIn from './components/PopIn.vue'
 import PisteLine from './components/tableLine/PisteLine.vue'
 import { deepCopy } from './common.js'
-import { computed, ref, onBeforeMount } from 'vue';
+import { computed, ref, onBeforeMount, watchEffect } from 'vue';
 
 const popInDisplayed = ref(false)
 const isNewItem = ref(true)
-const pisteToModify = ref(undefined)
+const currentOpportunity = ref(undefined)
 const idsToDelete = ref(new Set())
-const pistes = ref(new Map())
-const deleteButtonDisabled = ref(0)
+const opportunities = ref(new Map())
 const token = ref(null)
+const errorMessage = ref(null)
+
+watchEffect(async () => {
+  const list = new Set()
+  for (const [key, val] of opportunities.value) {
+    if (val.isSelected) list.add(key)
+  }
+  idsToDelete.value = list
+})
 
 const technologiesList = computed(() => {
   const list = new Set()
-  for (const [key, val] of pistes.value) {
-    for (const techno of val.technos.split(', ')) {
-      list.add(techno)
+  for (const [key, val] of opportunities.value) {
+    for (const technology of val.technologies.split(', ')) {
+      list.add(technology)
     }
   }
   return list
 })
 
-onBeforeMount(() => {
-  getAllPistes()
-})
+const deleteButtonDisabled = computed(() => idsToDelete.value.size === 0)
 
-function getAllPistes() {
-  token.value = new URL(document.location).searchParams.get('access-token')
-  const optReq = {
-    method: 'GET',
-    headers: new Headers({ 'access-token': token.value })
-  }
-  fetch('/api/opportunities', optReq)
-    .then((response) => {
-      return response.json()
-    })
-    .then((datas) => {
-      pistes.value = new Map()
-      for (const item of datas) {
-        pistes.value.set(item.id, item)
-      }
-      calculateState()
-    })
-    .catch((err) => {
-      throw err
-    })
-}
+onBeforeMount(async () => {
+  await getAllPistes()
+})
 
 function openPopin(isFromPisteTable, piste) {
   isNewItem.value = !isFromPisteTable
   if (isFromPisteTable) {
-    pisteToModify.value = deepCopy(piste)
+    currentOpportunity.value = deepCopy(piste)
   }
   popInDisplayed.value = true
 }
 
 function closePopin() {
-  pisteToModify.value = undefined
+  currentOpportunity.value = undefined
   popInDisplayed.value = false
 }
 
-function savePiste(pisteFromPopin) {
-  // Ajout - MAJ d'une piste dans la liste
-  if (!pisteFromPopin.hasOwnProperty('id')) {
-    return
+async function getAllPistes() {
+  errorMessage.value = ''
+  token.value = new URL(document.location).searchParams.get('access-token')
+  const optReq = {
+    method: 'GET',
+    headers: new Headers({ 'access-token': token.value })
   }
-  pistes.value.set(pisteFromPopin.id, pisteFromPopin)
-  calculateState()
-  closePopin()
-  saveAllPistes()
-}
 
-function checkedPiste(data) {
-  // Gestion des checkbox du tableau
-  const [id, bool] = data
-  if (bool)
-    idsToDelete.value.add(id)
-  else
-    idsToDelete.value.delete(id)
-  deleteButtonDisabled.value = idsToDelete.value.size
-}
+  try {
+    const response = await fetch('/api/opportunity/all', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
+    }
 
-function removePiste(p) {
-  let oldSet = new Set()
-
-  // Supression via la popin
-  if (p !== undefined && !(p instanceof MouseEvent)) {
-    if (idsToDelete.value.size > 0) // on conserve la sélection du tableau du main
-      oldSet = idsToDelete.value
-    idsToDelete.value = new Set([p.id])
+    const datas = await response.json();
+    opportunities.value = new Map()
+    for (const item of datas) {
+      opportunities.value.set(item.uuid, { ...item, isSelected: false })
+    }
+  } catch (error) {
+    opportunities.value = new Map()
+    errorMessage.value = error
   }
-  idsToDelete.value.forEach(id => pistes.value.delete(id))
-
-  idsToDelete.value = oldSet
-  closePopin()
-  saveAllPistes()
-  deleteButtonDisabled.value = idsToDelete.value.size
 }
 
-function saveAllPistes() {
-  const datas = JSON.stringify(mapToArray(pistes.value, true))
+async function savePiste(opportunityFromPopin) {
+  errorMessage.value = ''
+  const opportunity = JSON.stringify(opportunityFromPopin)
   const optReq = {
     method: 'POST',
     headers: new Headers({
       'access-token': token.value,
       'Content-Type': 'application/json',
-      'Content-Length': datas.length
+      'Content-Length': opportunity.length
     }),
-    body: datas
+    body: opportunity
   }
-  fetch('/api/update/pistes', optReq)
-    .catch((err) => console.log(err))
+
+  try {
+    const response = await fetch('/api/opportunity/update', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
+    }
+
+    const datas = await response.json();
+    opportunities.value.set(datas.uuid, { ...datas, isSelected: false })
+  } catch (error) {
+    errorMessage.value = error
+  } finally {
+    closePopin()
+  }
+
 }
 
-function calculateState() {
-  // Gestion de l'état d'une piste (Nouvelle, Postulée, En attente, Fermée, ...)
-  for (let [id, piste] of pistes.value) {
-    if (piste.closed) {
-      piste.etat = 'Fermée'
+async function removeSelection(eventFromPopup) {
+  errorMessage.value = ''
+  let oldSet = new Set()
+
+  if (eventFromPopup !== undefined && !(eventFromPopup instanceof MouseEvent)) {
+    if (idsToDelete.value.size > 0)
+      oldSet = idsToDelete.value
+    idsToDelete.value = new Set([eventFromPopup.id])
+  }
+
+  let ids = []
+  idsToDelete.value.forEach(id => ids.push(id))
+  ids = JSON.stringify(ids)
+
+  const optReq = {
+    method: 'DELETE',
+    headers: new Headers({
+      'access-token': token.value,
+      'Content-Type': 'application/json',
+      'Content-Length': ids.length
+    }),
+    body: ids
+  }
+
+  try {
+    const response = await fetch('/api/opportunity/delete', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
     }
-    else if (undefined !== piste.dates && piste.dates.length > 0) {
-      // récupère la dernière date insérée
-      let lastDate = piste.dates[piste.dates.length - 1]
-      // Si c'est une date de postulation et qu'elle est inférieure à la date du jour : Etat = Postulée
-      if (lastDate.type === 'Postulation' && new Date(lastDate.date) < new Date()) piste.etat = 'Postulée'
-      // Si la date d'entretient n'est pas encore passée
-      else if (new Date(lastDate.date) > new Date()) piste.etat = 'En attente d\'entretient'
-      // Si la date d'entretient est passée et que l'on n'a pas eu de retour
-      else if (new Date(lastDate.date) < new Date() && !lastDate.retour) piste.etat = 'En attente de retour'
-      else piste.etat = 'Terminée'
+
+    const datas = await response.json();
+    opportunities.value.clear()
+    for (const item of datas) {
+      opportunities.value.set(item.uuid, { ...item, isSelected: false })
     }
+  } catch (error) {
+    errorMessage.value = error
+  } finally {
+    idsToDelete.value = oldSet
+    closePopin()
+  }
+}
+
+async function closeOpportunity(opportunityFromPopin) {
+  errorMessage.value = ''
+  const stringifiedOpportunity = JSON.stringify(opportunityFromPopin)
+  const optReq = {
+    method: 'POST',
+    headers: new Headers({
+      'access-token': token.value,
+      'Content-Type': 'application/json',
+      'Content-Length': stringifiedOpportunity.length
+    }),
+    body: stringifiedOpportunity
+  }
+
+  try {
+    const response = await fetch('/api/opportunity/close', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
+    }
+
+    const datas = await response.json();
+    opportunities.value.set(datas.uuid, { ...datas, isSelected: false })
+  } catch (error) {
+    errorMessage.value = error
+  } finally {
+    closePopin()
   }
 }
 
@@ -192,13 +239,14 @@ function mapToArray(obj, arrayWanted) {
 
 <style>
 :root {
-  --main-bg-color: rgb(43, 43, 43);
-  --main-darker-bg-color: rgb(20, 20, 20);
-  --main-lighter-bg-color: rgb(87, 87, 87);
+  --main-bg-color: rgb(55, 50, 62);
+  --main-darker-bg-color: rgb(27, 26, 29);
+  --main-lighter-bg-color: rgb(157, 155, 159);
   --main-text-color: rgb(248, 248, 248);
-  --main-violet: rgb(76, 53, 147);
-  --main-lighter-violet: rgb(175, 147, 235);
-  --main-red: rgb(161, 27, 27);
+  --main-color-theme: rgb(26, 120, 158);
+  --main-lighter-color-theme: rgb(142, 202, 230);
+  --main-error-color: rgb(134, 41, 21);
+  --main-valid-color: rgb(103, 148, 54);
   --shadow-element: 3px 5px 12px rgb(21 21 21 / 78%);
 }
 
@@ -215,7 +263,7 @@ header {
   padding: 0.5em 0;
   text-align: center;
   font-size: 2em;
-  background-color: var(--main-violet);
+  background-color: var(--main-color-theme);
 }
 
 main {
@@ -224,14 +272,18 @@ main {
 
 button {
   font-size: 1em;
-  background: var(--main-violet);
+  background: var(--main-color-theme);
   color: var(--main-text-color);
   border: none;
   padding: 10px 15px;
 }
 
 button.deleteButton {
-  background-color: var(--main-red);
+  background-color: var(--main-error-color);
+}
+
+button.greenButton {
+  background-color: var(--main-valid-color);
 }
 
 button:hover {
@@ -272,7 +324,7 @@ th {
   font-weight: lighter;
   height: 30px;
   background: var(--main-darker-bg-color);
-  color: var(--main-lighter-violet);
+  color: var(--main-text-color);
 }
 
 th,
@@ -334,5 +386,14 @@ td {
 .genericInput {
   margin: 0;
   padding: 10px;
+}
+
+.action-panel {
+  display: flex;
+}
+
+.error {
+  margin-left: 1.5rem;
+  color: rgb(197, 53, 22)
 }
 </style>
