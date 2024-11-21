@@ -73,4 +73,12 @@ export class Opportunity extends Entity<OpportunityType> {
   public getState() {
     return this.state
   }
+
+  public isClosed() {
+    return this.closed
+  }
+
+  public close() {
+    this.closed = true
+  }
 }

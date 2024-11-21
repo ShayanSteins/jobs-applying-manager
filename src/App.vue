@@ -13,7 +13,8 @@
       </div>
       <transition name="fade">
         <PopIn v-if="popInDisplayed" :isNewItem="isNewItem" :currentOpportunity="currentOpportunity" @close="closePopin"
-          @delete="removeSelection" @save="savePiste" :listTechno="technologiesList"></PopIn>
+          @delete="removeSelection" @save="savePiste" @close-opportunity="closeOpportunity"
+          :listTechno="technologiesList"></PopIn>
       </transition>
       <div class="boardContent">
         <table class="shadow">
@@ -186,6 +187,35 @@ async function removeSelection(eventFromPopup) {
     errorMessage.value = error
   } finally {
     idsToDelete.value = oldSet
+    closePopin()
+  }
+}
+
+async function closeOpportunity(opportunityFromPopin) {
+  errorMessage.value = ''
+  const stringifiedOpportunity = JSON.stringify(opportunityFromPopin)
+  const optReq = {
+    method: 'POST',
+    headers: new Headers({
+      'access-token': token.value,
+      'Content-Type': 'application/json',
+      'Content-Length': stringifiedOpportunity.length
+    }),
+    body: stringifiedOpportunity
+  }
+
+  try {
+    const response = await fetch('/api/opportunity/close', optReq)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(body);
+    }
+
+    const datas = await response.json();
+    opportunities.value.set(datas.uuid, { ...datas, isSelected: false })
+  } catch (error) {
+    errorMessage.value = error
+  } finally {
     closePopin()
   }
 }

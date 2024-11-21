@@ -31,6 +31,7 @@
           </div>
         </div>
         <div class="buttonContainer">
+          <button v-if="!isNewItem" @click="$emit('close-opportunity', opportunity)">Close</button>
           <button v-if="!isNewItem" @click="$emit('delete', opportunity)" class="deleteButton">Remove</button>
           <button v-if="isNewItem" type="submit" class="greenButton">Save</button>
           <button v-else type="submit" class="greenButton">Update</button>
@@ -81,7 +82,7 @@ const props = defineProps({
 const opportunity = ref(props.currentOpportunity)
 const opportunityBeforeModification = deepCopy(opportunity.value)
 
-const emit = defineEmits(['save', 'close', 'delete'])
+const emit = defineEmits(['save', 'close', 'delete', 'close-opportunity'])
 
 onMounted(() => {
   // Prevent any submit action while pressing ENTER

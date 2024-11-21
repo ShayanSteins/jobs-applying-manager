@@ -10,6 +10,7 @@ import { DeleteUserOpportunitiesUseCase } from './opportunity/app/use-case/delet
 import { UUID } from './opportunity/domain/opportunity.type'
 import { randomUUID } from 'crypto'
 import { Opportunity } from './opportunity/domain/opportunity.entity'
+import { CloseOpportunityUseCase } from './opportunity/app/use-case/close-oppotunity.use-case'
 const { clientId, clientSecret } = await import(OAuthKeysPath)
 
 enum MIME_TYPES {
@@ -81,6 +82,20 @@ export default class Router {
             })
             this.sendData(res, 'json', opportunity)
           })
+        } else if (fileName === '/api/opportunity/close') {
+          let concatedDatas = Buffer.alloc(0)
+          req.on('data', (datas) => {
+            concatedDatas = Buffer.concat([concatedDatas, datas])
+          })
+          req.on('end', async () => {
+            const closeOpportunityUseCase = new CloseOpportunityUseCase(opportunityRepository)
+            const opportunity = await closeOpportunityUseCase.execute({
+              opportunity: this.parseData(concatedDatas),
+            })
+            this.sendData(res, 'json', opportunity)
+          })
+        } else {
+          this.sendError(res, 400, `Bad Request: unable to reach ${fileName}`)
         }
       } else if (!fs.existsSync(basePath + fileName)) {
         // 404 ERROR
@@ -101,12 +116,7 @@ export default class Router {
     res.end(JSON.stringify(data))
   }
 
-  private sendFile(
-    res: ServerResponse,
-    extension: string,
-    path: string,
-    fileName: string
-  ) {
+  private sendFile(res: ServerResponse, extension: string, path: string, fileName: string) {
     res.statusCode = 200
     res.setHeader('Content-Type', MIME_TYPES[extension as mimeTypesStrings])
     res.end(fs.readFileSync(path + fileName))
